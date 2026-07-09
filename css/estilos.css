@@ -1,0 +1,599 @@
+/* ============ Fuente local (offline) ============ */
+@font-face {
+  font-family: 'Tiza';
+  src: url('fuentes/PatrickHand-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============ Reset básico ============ */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  height: 100%;
+  overscroll-behavior: none;
+}
+body {
+  font-family: 'Tiza', 'Comic Sans MS', cursive, sans-serif;
+  background: #0c0c0c;
+  color: #f2f0ea;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+button, input {
+  font-family: inherit;
+  color: inherit;
+}
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3, p { margin: 0 0 10px; }
+
+/* ============ Paleta de tizas de colores (jugadores podrida) ============ */
+:root {
+  --tiza-blanco: #f5f3ef;
+  --tiza-amarillo: #ffd873;
+  --tiza-rosa: #ff9ecf;
+  --tiza-celeste: #7ec8ff;
+  --tiza-verde: #8ee08e;
+  --tiza-naranja: #ffab66;
+  --tiza-violeta: #c39bff;
+  --tiza-rojo: #ff8a8a;
+  --tiza-turquesa: #6de0d0;
+}
+
+/* ============ App shell / router ============ */
+#app {
+  position: fixed;
+  inset: 0;
+  /* Refuerzo para navegadores de celular: la barra de direcciones puede
+     angostar el alto real disponible. dvh se ajusta a eso; vh a secas a
+     veces se queda con el alto "grande" y deja contenido tapado abajo. */
+  height: 100vh;
+  height: 100dvh;
+}
+.pantalla { position: absolute; inset: 0; }
+.oculta { display: none !important; }
+
+/* ============ Marco de madera ============ */
+.marco-madera {
+  position: absolute; inset: 0;
+  padding: clamp(12px, 3.2vw, 24px);
+  padding-top: max(clamp(12px, 3.2vw, 24px), env(safe-area-inset-top));
+  padding-bottom: max(clamp(12px, 3.2vw, 24px), env(safe-area-inset-bottom));
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.4), transparent 6%, transparent 94%, rgba(0,0,0,.4)),
+    linear-gradient(180deg, rgba(0,0,0,.35), transparent 5%, transparent 95%, rgba(0,0,0,.35)),
+    repeating-linear-gradient(95deg, #8a5b35 0 4px, #764a29 4px 7px, #96603a 7px 12px, #7f5230 12px 16px);
+  box-sizing: border-box;
+}
+
+/* ============ Pizarra ============ */
+.pizarra {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 16px;
+  background-color: #171717;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, #242424 0%, #161616 65%),
+    repeating-radial-gradient(circle at 20% 30%, rgba(255,255,255,.015) 0 1px, transparent 1px 3px),
+    repeating-radial-gradient(circle at 80% 70%, rgba(255,255,255,.012) 0 1px, transparent 1px 4px);
+  box-shadow: inset 0 0 50px rgba(0,0,0,.65), inset 0 0 3px rgba(0,0,0,.9);
+}
+/* Wrapper interno para scroll: la pizarra de afuera queda con overflow:hidden y
+   esquinas redondeadas siempre limpias, porque el navegador nunca redondea la
+   propia scrollbar de un elemento — por eso el scroll vive en este div interno,
+   no en la pizarra misma. */
+.pizarra-interior-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 14px;
+}
+
+/* ============ Textos ============ */
+.titulo-app {
+  text-align: center;
+  font-size: clamp(2rem, 8.5vw, 2.7rem);
+  letter-spacing: 1px;
+  margin: 6px 0 0;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255,255,255,.15);
+}
+.titulo-vdk { color: var(--tiza-amarillo); }
+.icono-fantasma { display: inline-block; vertical-align: middle; }
+.titulo-pantalla {
+  font-size: clamp(1.4rem, 6vw, 1.8rem);
+  text-align: center;
+  margin: 4px 0 18px;
+}
+.subtitulo-tiza {
+  font-size: 1.2rem;
+  opacity: .9;
+  margin: 14px 0 8px;
+}
+
+/* ============ Botones tiza ============ */
+.btn {
+  font-size: 1.15rem;
+  padding: 13px 20px;
+  border-radius: 10px;
+  border: 2px solid #f2f0ea;
+  text-align: center;
+  transition: transform .08s ease, background .15s ease;
+}
+.btn:active { transform: scale(.96); }
+.btn-tiza {
+  background: rgba(242,240,234,.08);
+  color: #fdfdfb;
+}
+.btn-tiza:active { background: rgba(242,240,234,.2); }
+.btn-tiza-outline {
+  background: transparent;
+  border-style: dashed;
+  color: #d8d6cf;
+  opacity: .85;
+}
+.btn-grande { width: 100%; font-size: 1.3rem; padding: 16px; margin-top: 10px; }
+.btn-link {
+  display: block;
+  margin: 14px auto 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  opacity: .75;
+  font-size: 1rem;
+  background: none;
+  border: none;
+}
+.btn-peligro { color: #ff9d9d; }
+.btn-volver {
+  align-self: flex-start;
+  opacity: .8;
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+  background: none; border: none;
+}
+.btn-icono {
+  font-size: 1.4rem;
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.25);
+}
+.btn-menu-tiza {
+  font-size: 1.1rem;
+  padding: 10px 26px;
+  border: 2px solid #f2f0ea;
+  border-radius: 8px;
+  background: #161616;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.03);
+}
+.fila-botones { display: flex; gap: 10px; margin-top: 10px; }
+.fila-botones .btn { flex: 1; }
+
+/* ============ Inputs ============ */
+.etiqueta-tiza { display: block; font-size: 1.05rem; opacity: .8; margin: 14px 0 4px; }
+.etiqueta-tiza.chica { font-size: .9rem; margin-top: 12px; }
+.etiqueta-tiza.separada { margin-top: 28px; padding-top: 14px; border-top: 1px dashed rgba(255,255,255,.15); }
+.input-tiza {
+  width: 100%;
+  background: rgba(255,255,255,.05);
+  border: none;
+  border-bottom: 2px dashed rgba(242,240,234,.5);
+  color: #fff;
+  font-size: 1.2rem;
+  padding: 8px 6px;
+  font-family: inherit;
+}
+.input-tiza:focus { outline: none; border-bottom-color: #fff; }
+
+/* ============ Selector de opciones (toggle) ============ */
+.selector-opciones { display: flex; gap: 10px; margin: 6px 0 4px; }
+.opcion-tiza {
+  flex: 1;
+  padding: 12px;
+  font-size: 1.1rem;
+  border: 2px solid rgba(242,240,234,.4);
+  border-radius: 8px;
+  color: #cfcdc6;
+  background: transparent;
+}
+.opcion-tiza.activa {
+  border-color: #fff;
+  color: #fff;
+  background: rgba(255,255,255,.1);
+}
+
+/* ============ Fila con toggle (checkbox) ============ */
+.fila-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0;
+  font-size: 1rem;
+  opacity: .92;
+}
+.fila-toggle input[type="checkbox"] {
+  width: 42px; height: 24px;
+  accent-color: #f2d98a;
+}
+
+/* ============ Stepper (-, número, +) ============ */
+.stepper {
+  display: flex; align-items: center; gap: 16px;
+  justify-content: center;
+  margin: 8px 0;
+}
+.stepper span { font-size: 1.6rem; min-width: 40px; text-align: center; }
+.stepper .btn-icono { width: 40px; height: 40px; font-size: 1.2rem; }
+
+/* ============ Pantalla inicio ============ */
+.pizarra-inicio { justify-content: flex-start; align-items: stretch; }
+.logo-inicio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 6px 0 26px;
+}
+.logo-fantasma-grande { width: clamp(64px, 20vw, 88px); height: auto; filter: drop-shadow(0 0 10px rgba(255,255,255,.12)); }
+.fila-enlaces {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin-top: 8px;
+}
+.fila-enlaces .btn-link { margin: 0; }
+.tarjeta-juego {
+  border: 2px dashed rgba(242,240,234,.35);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 18px;
+}
+.tarjeta-juego h2 { text-align: center; font-size: 1.5rem; }
+.estado-partida { text-align: center; opacity: .75; font-size: .95rem; }
+
+/* ============ Truco: layout de dos lados ============ */
+.pizarra-truco { padding: 0; }
+.btn-volver-flotante {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  left: 10px;
+  z-index: 5;
+  width: 38px;
+  height: 38px;
+  font-size: 1.2rem;
+  background: rgba(0,0,0,.35);
+}
+.truco-zona-superior {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+}
+.linea-divisoria-v {
+  position: absolute;
+  left: 50%; top: 6%; bottom: 4%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(180deg, rgba(255,255,255,.55) 0 6px, transparent 6px 11px);
+}
+.lado-truco {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: max(28px, env(safe-area-inset-top));
+  height: 100%;
+}
+.nombre-equipo {
+  font-size: clamp(1.3rem, 6vw, 1.7rem);
+  text-align: center;
+  padding: 4px 10px;
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nombre-equipo.editando {
+  outline: 1px dashed rgba(255,255,255,.6);
+  white-space: normal;
+  overflow: visible;
+}
+.zona-tacto {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
+.puntaje-grande {
+  font-size: clamp(4.5rem, 24vw, 7.5rem);
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 14px rgba(255,255,255,.18);
+  transition: transform .12s ease;
+}
+.puntaje-grande.animar { animation: pulso-puntaje .28s ease; }
+@keyframes pulso-puntaje {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+.etiqueta-etapa {
+  margin-top: 6px;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: .6;
+}
+.fila-trofeos {
+  min-height: 34px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  padding-bottom: 14px;
+  font-size: 1.5rem;
+  max-width: 90%;
+}
+.fila-trofeos .icono-fantasma { filter: drop-shadow(0 0 3px rgba(255,255,255,.3)); margin: 0 2px; }
+
+.barra-inferior {
+  flex-shrink: 0;
+  height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px dashed rgba(255,255,255,.12);
+}
+
+/* ============ Overlays ============ */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(5,5,5,.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 24px;
+}
+.overlay-contenido {
+  background: #161616;
+  border: 2px solid rgba(255,255,255,.25);
+  border-radius: 14px;
+  padding: 22px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 86vh;
+  overflow-y: auto;
+  box-shadow: 0 0 40px rgba(0,0,0,.6);
+}
+.overlay-contenido p { text-align: center; font-size: 1.1rem; }
+.overlay-scroll { text-align: left; }
+
+.texto-ganador {
+  font-size: 1.6rem;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+/* ============ Menú: filas de opciones ============ */
+.menu-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px dashed rgba(255,255,255,.15);
+  font-size: 1.05rem;
+}
+.menu-fila:last-child { border-bottom: none; }
+.menu-seccion-titulo { opacity: .55; font-size: .9rem; text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 2px; }
+
+/* ============ Podrida ============ */
+.cabecera-podrida { text-align: center; margin-bottom: 10px; }
+.info-ronda { font-size: 1.3rem; }
+
+.tabla-posiciones { margin-bottom: 16px; }
+.fila-jugador {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.04);
+  transition: transform .3s ease;
+}
+.fila-jugador .icono-fantasma,
+.fila-apuesta-jugador .icono-fantasma,
+.fila-resultado-jugador .icono-fantasma,
+.podio-fila .icono-fantasma,
+.chip .icono-fantasma {
+  flex-shrink: 0;
+}
+.fila-jugador .nombre-jugador { flex: 1; font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fila-jugador .puntaje-jugador { font-size: 1.25rem; min-width: 42px; text-align: right; }
+.fila-jugador .icono-mazo { font-size: 1rem; opacity: .8; }
+.diferencia-puntos {
+  font-size: .95rem;
+  opacity: 0;
+  margin-left: 6px;
+  color: #9be89b;
+}
+.diferencia-puntos.mostrar { opacity: 1; animation: subir-diferencia 1.4s ease forwards; }
+@keyframes subir-diferencia {
+  0% { opacity: 0; transform: translateY(4px); }
+  15% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
+.fila-apuesta-jugador, .fila-resultado-jugador {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+.fila-apuesta-jugador .nombre-jugador,
+.fila-resultado-jugador .nombre-jugador { flex: 1; font-size: 1.05rem; }
+
+.aviso-tiza {
+  background: rgba(255, 216, 115, .12);
+  border: 1px dashed var(--tiza-amarillo);
+  color: var(--tiza-amarillo);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: .92rem;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* ============ Config podrida: chips de jugadores ============ */
+.lista-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; }
+
+/* ============ Lista ordenable (orden de reparto de la podrida) ============ */
+.lista-orden { display: flex; flex-direction: column; gap: 6px; margin: 6px 0; }
+.fila-orden-persona {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.04);
+}
+.numero-orden {
+  min-width: 20px;
+  text-align: center;
+  opacity: .6;
+  font-size: .95rem;
+}
+.btn-orden {
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.25);
+}
+.btn-orden:disabled { opacity: .25; }
+.fila-orden-persona .quitar-chip { opacity: .6; font-size: 1.1rem; padding: 0 4px; }
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.3);
+  font-size: .98rem;
+  background: rgba(255,255,255,.04);
+}
+.chip .quitar-chip { opacity: .6; font-size: 1rem; padding: 0 2px; }
+.fila-agregar-jugador { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.fila-agregar-jugador .input-tiza { flex: 1; }
+
+.paleta-colores { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 4px; }
+.color-opcion {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+.color-opcion.seleccionado { border-color: #fff; transform: scale(1.15); }
+.color-opcion.usado { opacity: .25; pointer-events: none; }
+
+/* ============ Podio ============ */
+.podio-fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  font-size: 1.15rem;
+}
+.podio-medalla { font-size: 1.4rem; width: 30px; text-align: center; }
+
+/* ============ Historial ============ */
+.item-historial {
+  border: 1px dashed rgba(255,255,255,.25);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.item-historial .fecha-historial { opacity: .6; font-size: .85rem; margin-bottom: 4px; }
+.item-historial .resultado-historial { font-size: 1.05rem; }
+.stats-jugador-fila {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px dashed rgba(255,255,255,.12);
+  font-size: .95rem;
+}
+.stats-titulo { margin-top: 18px; }
+
+/* ============ Personas ============ */
+.tarjeta-persona {
+  border: 1px dashed rgba(255,255,255,.25);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.tarjeta-persona-cabecera { display: flex; align-items: center; gap: 10px; }
+.tarjeta-persona-stats { margin-top: 8px; }
+.stat-persona-fila {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: .92rem;
+}
+.etiqueta-stat { opacity: .6; min-width: 60px; }
+.diferencia-positiva { color: #9be89b; }
+.diferencia-negativa { color: #ff9d9d; }
+
+/* ============ Candado ============ */
+.overlay-candado {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.94);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+}
+.candado-icono { font-size: 3rem; }
+.candado-ayuda { opacity: .55; font-size: .9rem; }
+
+/* ============ Toast ============ */
+.toast {
+  position: fixed;
+  left: 50%; bottom: 30px;
+  transform: translateX(-50%);
+  background: #222;
+  border: 1px solid rgba(255,255,255,.3);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: .95rem;
+  z-index: 200;
+  transition: opacity .3s ease;
+}
+
+/* ============ Reordenamiento animado (FLIP) ============ */
+.fila-jugador.moviendo { transition: transform .35s ease; }

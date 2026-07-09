@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#431321">
+<meta name="description" content="Anotador de puntajes para truco y podrida">
+<title>Anotador VDK</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="iconos/icono-192.png">
+<link rel="apple-touch-icon" href="iconos/icono-192.png">
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ======================= PANTALLA: INICIO ======================= -->
+  <section id="pantalla-inicio" class="pantalla">
+    <div class="marco-madera">
+      <div class="pizarra pizarra-inicio">
+        <div class="pizarra-interior-scroll">
+          <div class="logo-inicio">
+            <svg class="icono-fantasma logo-fantasma-grande" viewBox="0 0 241.4 284.2" fill="none" stroke="#f5f3ef" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+              <path d="M218.62,103.35 C221.88,102.85 224.90,102.55 227.81,101.82 C228.89,101.55 230.29,100.37 230.51,99.38 C230.85,97.87 230.91,95.88 228.48,95.38 C227.42,95.17 221.08,91.06 218.81,90.89 C212.43,90.40 196.00,90.65 194.61,91.39 C188.25,94.78 181.62,97.40 174.74,99.50 C172.60,100.16 171.79,99.38 171.90,97.50 C172.05,95.04 172.46,92.60 172.86,90.16 C173.82,84.40 175.34,78.68 175.70,72.89 C176.06,66.97 176.22,60.76 174.82,55.09 C173.33,49.02 170.22,43.26 167.21,37.69 C165.42,34.39 162.51,31.69 160.01,28.79 C154.31,22.20 146.73,18.20 138.86,15.29 C133.18,13.20 127.06,11.58 120.65,12.16 C111.95,12.95 102.91,10.53 94.57,14.71 C90.68,16.66 86.72,18.66 83.27,21.28 C78.75,24.70 75.14,29.04 71.90,33.82 C67.31,40.57 64.23,47.82 62.52,55.70 C61.86,58.70 60.67,80.73 62.57,88.54 C63.11,90.75 63.88,92.91 64.74,95.75 C58.14,92.89 30.44,88.74 23.14,93.09 C19.78,95.08 16.07,96.50 13.02,99.10 C10.96,100.85 10.53,103.24 11.29,105.38 C11.58,106.22 14.17,106.46 15.74,106.58 C18.32,106.77 20.93,106.63 23.48,106.63 C20.81,112.01 19.04,117.29 20.16,123.02 C20.97,127.20 24.77,128.07 28.02,125.08 C30.28,123.01 33.56,123.44 35.61,126.06 C35.78,126.28 36.03,126.43 36.24,126.62 C38.60,128.80 41.31,130.71 43.21,133.23 C45.55,136.35 47.40,139.88 49.11,143.41 C50.82,146.93 52.92,150.56 53.41,154.33 C54.41,162.12 54.53,170.03 54.88,177.90 C55.14,183.65 55.18,189.42 55.37,195.19 C55.59,202.19 61.08,210.35 63.53,212.73 C65.97,215.11 75.14,220.91 75.14,220.91 S77.70,199.19 79.28,197.21 C80.24,196.01 83.41,195.41 83.41,195.41 S87.46,196.27 88.09,197.91 C90.02,202.91 92.04,207.89 93.53,213.03 C95.87,221.11 98.57,228.87 102.74,236.35 C105.47,241.26 117.56,252.27 119.90,254.42 C122.33,256.65 128.48,259.36 128.48,259.36 S127.82,253.02 127.75,252.43 C127.47,250.02 127.23,247.60 127.22,245.17 C127.21,243.44 128.53,239.71 128.53,239.71 S138.40,267.46 139.31,268.85 C140.19,270.84 147.42,273.71 147.42,273.71 S147.75,270.23 147.08,268.88 C144.21,263.14 146.63,257.70 148.40,252.65 C150.72,246.04 155.21,240.17 157.32,233.52 C159.48,226.70 164.05,220.54 163.75,212.97 C163.73,212.58 163.77,211.94 163.86,211.56 C164.47,208.95 166.70,198.58 166.70,198.58 S167.44,208.65 167.32,212.28 C167.25,214.60 168.60,215.02 170.20,214.37 C171.61,213.81 173.08,212.82 173.93,211.60 C175.28,209.65 176.04,207.29 177.23,205.20 C179.31,201.53 182.03,198.13 183.57,194.26 C185.23,190.08 186.24,185.53 186.83,181.05 C187.93,172.78 188.52,164.44 189.32,156.12 C189.51,154.22 191.85,145.60 192.29,143.06 C193.78,134.43 197.88,127.51 205.38,122.88 C207.26,121.73 209.71,121.52 211.62,120.40 C213.45,119.33 214.72,118.93 216.43,120.61 C218.84,122.99 223.34,121.80 223.88,118.67 C224.14,117.13 224.14,115.33 223.58,113.91 C222.24,110.51 220.50,107.27 218.62,103.35 Z"/>
+              <path d="M110.79,57.75 C110.41,67.89 107.08,76.60 98.80,83.01 C95.48,85.58 89.42,84.81 86.61,81.66 C81.29,75.72 80.62,68.73 82.23,61.52 C83.22,57.08 85.11,52.75 87.18,48.67 C89.49,44.09 96.43,40.80 100.38,41.78 C106.61,43.32 110.48,48.23 110.79,55.01 C110.83,55.92 110.79,56.84 110.79,57.75 Z"/>
+              <path d="M138.59,44.49 C129.52,39.51 121.88,42.90 120.84,51.75 C119.51,63.02 124.36,72.54 132.66,80.00 C136.06,83.05 140.51,83.74 144.78,81.09 C149.86,77.94 151.35,72.96 151.56,68.52 C151.54,59.31 145.79,48.44 138.59,44.49 Z"/>
+            </svg>
+            <h1 class="titulo-app">Anotador <span class="titulo-vdk">VDK</span></h1>
+          </div>
+
+          <div class="tarjeta-juego" data-juego="truco">
+            <h2>Truco</h2>
+            <p class="estado-partida" data-estado-truco hidden></p>
+            <div class="fila-botones">
+              <button class="btn btn-tiza" data-accion="continuar-truco" hidden>Continuar</button>
+              <button class="btn btn-tiza-outline" data-accion="nueva-truco">Nueva partida</button>
+            </div>
+          </div>
+
+          <div class="tarjeta-juego" data-juego="podrida">
+            <h2>Podrida</h2>
+            <p class="estado-partida" data-estado-podrida hidden></p>
+            <div class="fila-botones">
+              <button class="btn btn-tiza" data-accion="continuar-podrida" hidden>Continuar</button>
+              <button class="btn btn-tiza-outline" data-accion="nueva-podrida">Nueva partida</button>
+            </div>
+          </div>
+
+          <div class="fila-enlaces">
+            <button class="btn-link" data-accion="ir-personas">Ver personas</button>
+            <button class="btn-link" data-accion="ir-historial">Ver historial</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= PANTALLA: CONFIG TRUCO ======================= -->
+  <section id="pantalla-truco-config" class="pantalla oculta">
+    <div class="marco-madera">
+      <div class="pizarra">
+        <div class="pizarra-interior-scroll">
+          <button class="btn-volver" data-accion="volver-inicio">&larr; Volver</button>
+          <h1 class="titulo-pantalla">Truco — Nueva partida</h1>
+
+          <label class="etiqueta-tiza">Equipo 1</label>
+          <input class="input-tiza" type="text" id="truco-nombre-a" maxlength="18" value="Nosotros">
+          <p class="etiqueta-tiza chica">&iquest;Qui&eacute;n juega? (opcional, para llevar estad&iacute;sticas)</p>
+          <div class="lista-chips" id="truco-a-lista-personas"></div>
+          <div class="fila-agregar-jugador">
+            <input class="input-tiza" type="text" id="truco-a-nuevo-nombre" maxlength="16" placeholder="Nombre">
+            <button class="btn btn-tiza" data-accion="truco-a-agregar">Agregar</button>
+          </div>
+          <div class="paleta-colores" id="truco-a-paleta"></div>
+          <div id="truco-a-guardados-wrap" hidden>
+            <label class="etiqueta-tiza chica">Personas guardadas</label>
+            <div class="lista-chips" id="truco-a-lista-guardados"></div>
+          </div>
+
+          <label class="etiqueta-tiza separada">Equipo 2</label>
+          <input class="input-tiza" type="text" id="truco-nombre-b" maxlength="18" value="Ellos">
+          <p class="etiqueta-tiza chica">&iquest;Qui&eacute;n juega? (opcional)</p>
+          <div class="lista-chips" id="truco-b-lista-personas"></div>
+          <div class="fila-agregar-jugador">
+            <input class="input-tiza" type="text" id="truco-b-nuevo-nombre" maxlength="16" placeholder="Nombre">
+            <button class="btn btn-tiza" data-accion="truco-b-agregar">Agregar</button>
+          </div>
+          <div class="paleta-colores" id="truco-b-paleta"></div>
+          <div id="truco-b-guardados-wrap" hidden>
+            <label class="etiqueta-tiza chica">Personas guardadas</label>
+            <div class="lista-chips" id="truco-b-lista-guardados"></div>
+          </div>
+
+          <label class="etiqueta-tiza separada">Jugar a</label>
+          <div class="selector-opciones" id="truco-objetivo-selector">
+            <button class="opcion-tiza activa" data-valor="40">40</button>
+            <button class="opcion-tiza" data-valor="51">51</button>
+          </div>
+
+          <button class="btn btn-tiza btn-grande" data-accion="empezar-truco">Empezar partida</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= PANTALLA: JUEGO TRUCO ======================= -->
+  <section id="pantalla-truco-juego" class="pantalla oculta">
+    <div class="marco-madera">
+      <div class="pizarra pizarra-truco">
+
+        <button class="btn-icono btn-volver-flotante" data-accion="volver-inicio" title="Volver al inicio" aria-label="Volver al inicio">&larr;</button>
+
+        <div class="truco-zona-superior">
+          <div class="linea-divisoria-v"></div>
+
+          <div class="lado-truco" data-lado="0">
+            <h2 class="nombre-equipo" data-nombre-equipo="0" contenteditable="false"></h2>
+            <div class="zona-tacto" data-zona-truco="0">
+              <span class="puntaje-grande" data-puntaje="0">0</span>
+              <span class="etiqueta-etapa" data-etapa="0"></span>
+            </div>
+            <div class="fila-trofeos" data-trofeos="0"></div>
+          </div>
+
+          <div class="lado-truco" data-lado="1">
+            <h2 class="nombre-equipo" data-nombre-equipo="1" contenteditable="false"></h2>
+            <div class="zona-tacto" data-zona-truco="1">
+              <span class="puntaje-grande" data-puntaje="1">0</span>
+              <span class="etiqueta-etapa" data-etapa="1"></span>
+            </div>
+            <div class="fila-trofeos" data-trofeos="1"></div>
+          </div>
+        </div>
+
+        <div class="barra-inferior">
+          <button class="btn-icono" data-accion="deshacer-truco" title="Deshacer" aria-label="Deshacer">&#8630;</button>
+          <button class="btn-menu-tiza" data-accion="abrir-menu">Menú</button>
+          <button class="btn-icono" data-accion="candado" title="Bloquear pantalla" aria-label="Bloquear pantalla">&#128274;</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Overlay: ganador del chico -->
+    <div class="overlay oculta" id="overlay-ganador-truco">
+      <div class="overlay-contenido">
+        <p class="texto-ganador">&iexcl;Gan&oacute; <span id="ganador-nombre"></span>!</p>
+        <div class="fila-botones">
+          <button class="btn btn-tiza btn-grande" data-accion="otro-chico">Otro chico</button>
+        </div>
+        <div class="fila-botones">
+          <button class="btn btn-tiza" data-accion="compartir-truco">Compartir</button>
+          <button class="btn btn-tiza-outline" data-accion="volver-inicio">Volver al inicio</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= PANTALLA: CONFIG PODRIDA ======================= -->
+  <section id="pantalla-podrida-config" class="pantalla oculta">
+    <div class="marco-madera">
+      <div class="pizarra">
+        <div class="pizarra-interior-scroll">
+          <button class="btn-volver" data-accion="volver-inicio">&larr; Volver</button>
+          <h1 class="titulo-pantalla">Podrida — Nueva partida</h1>
+
+          <label class="etiqueta-tiza">Jugadores</label>
+          <p class="etiqueta-tiza chica">Orden&aacute;los como est&aacute;n sentados: as&iacute; el mazo siempre pasa al de al lado.</p>
+          <div class="lista-orden" id="podrida-lista-jugadores"></div>
+
+          <div class="fila-agregar-jugador">
+            <input class="input-tiza" type="text" id="podrida-nuevo-nombre" maxlength="16" placeholder="Nombre del jugador">
+            <button class="btn btn-tiza" data-accion="agregar-jugador">Agregar</button>
+          </div>
+          <div class="paleta-colores" id="podrida-paleta"></div>
+
+          <div id="podrida-guardados-wrap" hidden>
+            <label class="etiqueta-tiza">Personas guardadas</label>
+            <div class="lista-chips" id="podrida-lista-guardados"></div>
+          </div>
+
+          <label class="etiqueta-tiza">Cantidad m&aacute;xima de cartas (por jugador)</label>
+          <div class="stepper">
+            <button class="btn-icono" data-accion="max-cartas-menos">&minus;</button>
+            <span id="podrida-max-cartas">7</span>
+            <button class="btn-icono" data-accion="max-cartas-mas">&plus;</button>
+          </div>
+          <p class="aviso-tiza" id="podrida-max-cartas-sugerencia" style="opacity:.7"></p>
+
+          <label class="fila-toggle">
+            <span>Marcar repartidor y rotarlo cada ronda</span>
+            <input type="checkbox" id="podrida-toggle-repartidor" checked>
+          </label>
+
+          <label class="fila-toggle">
+            <span>No permitir que todos acierten (al último que apuesta no se le deja completar la suma)</span>
+            <input type="checkbox" id="podrida-toggle-aviso" checked>
+          </label>
+
+          <button class="btn btn-tiza btn-grande" data-accion="empezar-podrida">Empezar partida</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= PANTALLA: JUEGO PODRIDA ======================= -->
+  <section id="pantalla-podrida-juego" class="pantalla oculta">
+    <div class="marco-madera">
+      <div class="pizarra pizarra-podrida">
+
+        <div class="pizarra-interior-scroll">
+          <div class="cabecera-podrida">
+            <p class="info-ronda" id="podrida-info-ronda">Ronda 1 &mdash; 1 carta</p>
+            <button class="btn-link" data-accion="ver-historial-rondas">Ver rondas</button>
+          </div>
+
+          <div class="tabla-posiciones" id="podrida-tabla"></div>
+
+          <div id="podrida-fase-apuestas">
+            <h3 class="subtitulo-tiza">Apuestas</h3>
+            <div class="fila-toggle">
+              <span>Cartas de esta ronda</span>
+              <div class="stepper">
+                <button class="btn-icono" data-accion="cartas-ronda-menos">&minus;</button>
+                <span id="podrida-cartas-ronda-valor">1</span>
+                <button class="btn-icono" data-accion="cartas-ronda-mas">&plus;</button>
+              </div>
+            </div>
+            <p class="aviso-tiza oculta" id="podrida-aviso-apuestas"></p>
+            <div id="podrida-filas-apuestas"></div>
+            <button class="btn btn-tiza btn-grande" data-accion="confirmar-apuestas">Confirmar apuestas</button>
+          </div>
+
+          <div id="podrida-fase-resultado" class="oculta">
+            <h3 class="subtitulo-tiza">&iquest;Cu&aacute;ntas gan&oacute; cada uno?</h3>
+            <p class="aviso-tiza oculta" id="podrida-aviso-resultado"></p>
+            <div id="podrida-filas-resultado"></div>
+            <button class="btn btn-tiza btn-grande" data-accion="terminar-ronda">Terminar ronda</button>
+          </div>
+        </div>
+
+        <div class="barra-inferior">
+          <button class="btn-icono" data-accion="volver-inicio" title="Volver al inicio" aria-label="Volver al inicio">&larr;</button>
+          <button class="btn-menu-tiza" data-accion="abrir-menu">Menú</button>
+          <button class="btn-icono" data-accion="candado" title="Bloquear pantalla" aria-label="Bloquear pantalla">&#128274;</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Overlay: historial de rondas / corrección -->
+    <div class="overlay oculta" id="overlay-rondas-podrida">
+      <div class="overlay-contenido overlay-scroll">
+        <h2 class="titulo-pantalla">Rondas jugadas</h2>
+        <div id="lista-rondas-podrida"></div>
+        <button class="btn btn-tiza-outline" data-accion="cerrar-overlay">Cerrar</button>
+      </div>
+    </div>
+
+    <!-- Overlay: edición de una ronda -->
+    <div class="overlay oculta" id="overlay-editar-ronda">
+      <div class="overlay-contenido overlay-scroll">
+        <h2 class="titulo-pantalla" id="editar-ronda-titulo">Ronda</h2>
+        <div id="editar-ronda-filas"></div>
+        <div class="fila-botones">
+          <button class="btn btn-tiza" data-accion="guardar-edicion-ronda">Guardar</button>
+          <button class="btn btn-tiza-outline" data-accion="cerrar-overlay">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlay: fin de partida / podio -->
+    <div class="overlay oculta" id="overlay-fin-podrida">
+      <div class="overlay-contenido overlay-scroll">
+        <h2 class="titulo-pantalla">&iexcl;Termin&oacute; la partida!</h2>
+        <div id="podio-podrida"></div>
+        <div id="tabla-final-podrida"></div>
+        <div class="fila-botones">
+          <button class="btn btn-tiza" data-accion="compartir-podrida">Compartir</button>
+          <button class="btn btn-tiza" data-accion="revancha-podrida">Revancha</button>
+          <button class="btn btn-tiza-outline" data-accion="volver-inicio">Volver al inicio</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= PANTALLA: PERSONAS ======================= -->
+  <section id="pantalla-personas" class="pantalla oculta">
+    <div class="marco-madera">
+      <div class="pizarra">
+        <div class="pizarra-interior-scroll">
+          <button class="btn-volver" data-accion="volver-inicio">&larr; Volver</button>
+          <h1 class="titulo-pantalla">Personas</h1>
+
+          <div class="fila-agregar-jugador">
+            <input class="input-tiza" type="text" id="personas-nuevo-nombre" maxlength="16" placeholder="Nombre">
+            <button class="btn btn-tiza" data-accion="agregar-persona">Agregar</button>
+          </div>
+          <div class="paleta-colores" id="personas-paleta"></div>
+
+          <div class="selector-opciones" id="personas-tabs">
+            <button class="opcion-tiza activa" data-tab="truco">Truco</button>
+            <button class="opcion-tiza" data-tab="podrida">Podrida</button>
+          </div>
+
+          <div id="personas-lista-truco"></div>
+          <div id="personas-lista-podrida" class="oculta"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= PANTALLA: HISTORIAL ======================= -->
+  <section id="pantalla-historial" class="pantalla oculta">
+    <div class="marco-madera">
+      <div class="pizarra">
+        <div class="pizarra-interior-scroll">
+          <button class="btn-volver" data-accion="volver-inicio">&larr; Volver</button>
+          <h1 class="titulo-pantalla">Historial</h1>
+
+          <div class="selector-opciones" id="historial-tabs">
+            <button class="opcion-tiza activa" data-tab="truco">Truco</button>
+            <button class="opcion-tiza" data-tab="podrida">Podrida</button>
+          </div>
+
+          <div id="historial-truco"></div>
+          <div id="historial-podrida" class="oculta"></div>
+
+          <button class="btn-link btn-peligro" data-accion="borrar-historial">Borrar historial</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= OVERLAY GENÉRICO: MENÚ ======================= -->
+  <div class="overlay oculta" id="overlay-menu">
+    <div class="overlay-contenido">
+      <h2 class="titulo-pantalla">Men&uacute;</h2>
+      <div id="menu-contenido"></div>
+      <button class="btn btn-tiza-outline" data-accion="cerrar-overlay">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- ======================= OVERLAY GENÉRICO: CONFIRMAR ======================= -->
+  <div class="overlay oculta" id="overlay-confirmar">
+    <div class="overlay-contenido">
+      <p id="confirmar-texto">&iquest;Segur&iacute;s?</p>
+      <div class="fila-botones">
+        <button class="btn btn-tiza" id="confirmar-si">S&iacute;</button>
+        <button class="btn btn-tiza-outline" id="confirmar-no">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= CANDADO (bloqueo anti-toques) ======================= -->
+  <div class="overlay-candado oculta" id="overlay-candado">
+    <span class="candado-icono">&#128274;</span>
+    <p>Pantalla bloqueada</p>
+    <p class="candado-ayuda">Mant&eacute;n presionado para desbloquear</p>
+  </div>
+
+  <!-- ======================= AVISO TOAST ======================= -->
+  <div class="toast oculta" id="toast"></div>
+
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
