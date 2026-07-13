@@ -466,7 +466,6 @@ function finalizarPartida() {
   if (!estado.practica) {
     agregarAlHistorial({
       tipo: 'podrida',
-      fecha: Date.now(),
       jugadores: statsJugadores,
       ganador: ordenados[0].nombre,
     });

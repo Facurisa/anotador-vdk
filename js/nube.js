@@ -6,7 +6,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
   initializeFirestore, persistentLocalCache, collection, doc, addDoc, setDoc, deleteDoc,
-  onSnapshot, query, orderBy,
+  onSnapshot, query, orderBy, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { storage } from './storage.js';
 
@@ -64,7 +64,12 @@ export function iniciarListeners() {
 
   const qHistorial = query(refHistorial(codigo), orderBy('fecha', 'desc'));
   quitarListenerHistorial = onSnapshot(qHistorial, (snap) => {
-    cacheHistorial = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // "estimate" = mientras el servidor todavía no confirmó el serverTimestamp
+    // de una escritura recién hecha en este mismo dispositivo, usar la hora
+    // local como estimación en vez de null — si no, el partido que se acaba
+    // de guardar puede desaparecer un instante de la lista (Firestore no sabe
+    // dónde ordenar un valor todavía nulo) hasta que el servidor confirma.
+    cacheHistorial = snap.docs.map((d) => ({ id: d.id, ...d.data({ serverTimestamps: 'estimate' }) }));
     callbacksHistorial.forEach((cb) => cb(cacheHistorial));
   }, (err) => console.warn('Error escuchando el historial del grupo', err));
 
@@ -90,10 +95,16 @@ export function onPersonasCambia(cb) {
 export function obtenerHistorial() { return cacheHistorial; }
 export function obtenerPersonas() { return cachePersonas; }
 
+// La fecha SIEMPRE la pone el servidor de Firestore (serverTimestamp), nunca
+// el reloj del celular: así nadie puede escribir una partida con una fecha
+// inventada, ni siquiera llamando al SDK directo desde la consola del
+// navegador (las reglas de seguridad exigen que "fecha" sea la hora real del
+// servidor). Se descarta cualquier "fecha" que venga de quien llama.
 export async function agregarAlHistorialNube(entrada) {
   const codigo = grupoActivo();
   if (!codigo) return;
-  await addDoc(refHistorial(codigo), entrada);
+  const { fecha, ...resto } = entrada;
+  await addDoc(refHistorial(codigo), { ...resto, fecha: serverTimestamp() });
 }
 
 export async function guardarPersonaNube(persona) {
@@ -120,7 +131,7 @@ export async function migrarDatosLocales() {
     await setDoc(doc(db, 'grupos', codigo, 'personas', p.id), p, { merge: true });
   }
   for (const entrada of historialLocal) {
-    const { id, ...datos } = entrada;
-    await addDoc(refHistorial(codigo), datos);
+    const { id, fecha, ...datos } = entrada;
+    await addDoc(refHistorial(codigo), { ...datos, fecha: serverTimestamp() });
   }
 }

@@ -58,8 +58,14 @@ function escapeHtml(texto) {
   return div.innerHTML;
 }
 
+// "ts" puede ser un Timestamp de Firestore (tiene .toDate()), un número viejo
+// de antes de este cambio (localStorage/Date.now()), o todavía null: la fecha
+// la pone el servidor (serverTimestamp) y hasta que confirma, el dispositivo
+// que acaba de guardar la ve un instante en null.
 function formatearFecha(ts) {
-  return new Date(ts).toLocaleDateString('es-UY', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  if (!ts) return 'Guardando…';
+  const fecha = typeof ts.toDate === 'function' ? ts.toDate() : new Date(ts);
+  return fecha.toLocaleDateString('es-UY', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 /* ---------------- Pantalla de historial ---------------- */

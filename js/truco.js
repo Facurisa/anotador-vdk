@@ -177,7 +177,6 @@ function ganarChico(equipoIdx) {
   if (!estado.practica) {
     agregarAlHistorial({
       tipo: 'truco',
-      fecha: Date.now(),
       equipoA: estado.equipos[0].nombre,
       equipoB: estado.equipos[1].nombre,
       puntosA: estado.equipos[0].puntos,
