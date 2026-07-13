@@ -4,6 +4,7 @@ import { agregarAlHistorial, compartirImagen } from './historial.js';
 import { crearSelectorPersonas } from './selector-personas.js';
 
 const UMBRAL_SWIPE = 30; // px para distinguir toque de deslizar
+const DURACION_FESTEJO = 10000; // ms que dura el festejo (champán/mamadera) antes de abrir el cartel de ganador
 
 let estado = null;
 let undoStack = [];
@@ -133,22 +134,39 @@ function aplicarDelta(equipoIdx, delta) {
   if (nuevo >= estado.objetivo) {
     ignorarToques = true;
     celebrarFinDeChico(equipoIdx);
-    setTimeout(() => ganarChico(equipoIdx), 3500);
+    setTimeout(() => ganarChico(equipoIdx), DURACION_FESTEJO);
   }
 }
 
-// Festejo breve antes de abrir el cartel de "¡Ganó...!": champán del lado
-// ganador, mamadera derramando leche del lado perdedor (chiste clásico del truco).
+// Festejo antes de abrir el cartel de "¡Ganó...!": champán del lado ganador,
+// mamadera derramando leche del lado perdedor (chiste clásico del truco). La
+// mamadera y las gotas se dibujan en CSS (no con el emoji 🍼) porque ese emoji
+// sale con tinte celeste en Windows y la idea es que la leche se vea blanca.
 function celebrarFinDeChico(equipoIdx) {
   const perdedorIdx = equipoIdx === 0 ? 1 : 0;
   const ladoGanador = document.querySelector(`[data-lado="${equipoIdx}"]`);
   const ladoPerdedor = document.querySelector(`[data-lado="${perdedorIdx}"]`);
   ladoGanador.classList.add('celebracion-ganador');
   ladoPerdedor.classList.add('celebracion-perdedor');
+
+  const mamadera = document.createElement('div');
+  mamadera.className = 'mamadera-anim';
+  mamadera.innerHTML = `
+    <div class="mamadera-grupo">
+      <div class="mamadera-cuerpo"></div>
+      <div class="mamadera-tapa"></div>
+    </div>
+    <div class="gota gota1"></div>
+    <div class="gota gota2"></div>
+    <div class="gota gota3"></div>
+  `;
+  ladoPerdedor.appendChild(mamadera);
+
   setTimeout(() => {
     ladoGanador.classList.remove('celebracion-ganador');
     ladoPerdedor.classList.remove('celebracion-perdedor');
-  }, 3500);
+    mamadera.remove();
+  }, DURACION_FESTEJO);
 }
 
 function ganarChico(equipoIdx) {
