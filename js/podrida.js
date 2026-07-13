@@ -97,6 +97,7 @@ export function prepararConfig() {
   document.getElementById('podrida-max-cartas').textContent = configMaxCartas;
   document.getElementById('podrida-toggle-repartidor').checked = true;
   document.getElementById('podrida-toggle-aviso').checked = true;
+  document.getElementById('podrida-practica').checked = false;
   selectorPodrida.reiniciar([]);
 }
 
@@ -116,11 +117,13 @@ function empezarPodrida() {
   if (personas.length < 2) { ui.toast('Agregá al menos 2 jugadores'); return; }
   const repartidorActivo = document.getElementById('podrida-toggle-repartidor').checked;
   const avisoApuestasActivo = document.getElementById('podrida-toggle-aviso').checked;
+  const practica = document.getElementById('podrida-practica').checked;
   estado = {
     jugadores: personas.map((j) => ({ ...j, activo: true })),
     maxCartas: configMaxCartas,
     repartidorActivo,
     avisoApuestasActivo,
+    practica,
     repartidorId: repartidorActivo ? personas[0].id : null,
     rondaActual: 1,
     cartasRondaActual: null,
@@ -235,6 +238,7 @@ function mostrarDiferencias(puntosRonda) {
 function renderCabecera() {
   document.getElementById('podrida-info-ronda').textContent = `Ronda ${estado.rondaActual} — ${cartasDeRonda()} ${cartasDeRonda() === 1 ? 'carta' : 'cartas'}`;
   document.getElementById('podrida-cartas-ronda-valor').textContent = cartasDeRonda();
+  document.getElementById('podrida-insignia-practica').classList.toggle('oculta', !estado.practica);
 }
 
 function participantesRonda() {
@@ -459,12 +463,14 @@ function finalizarPartida() {
   });
   const ordenados = [...statsJugadores].sort((a, b) => b.puntaje - a.puntaje);
 
-  agregarAlHistorial({
-    tipo: 'podrida',
-    fecha: Date.now(),
-    jugadores: statsJugadores,
-    ganador: ordenados[0].nombre,
-  });
+  if (!estado.practica) {
+    agregarAlHistorial({
+      tipo: 'podrida',
+      fecha: Date.now(),
+      jugadores: statsJugadores,
+      ganador: ordenados[0].nombre,
+    });
+  }
 
   renderPodio(ordenados);
   ui.abrirOverlay('overlay-fin-podrida');
@@ -492,6 +498,7 @@ function revancha() {
     maxCartas: estado.maxCartas,
     repartidorActivo: estado.repartidorActivo,
     avisoApuestasActivo: estado.avisoApuestasActivo,
+    practica: estado.practica,
     repartidorId: estado.repartidorActivo && jugadores.length ? jugadores[0].id : null,
     rondaActual: 1,
     cartasRondaActual: null,
@@ -691,6 +698,7 @@ async function reiniciarPartidaPodrida() {
     maxCartas: estado.maxCartas,
     repartidorActivo: estado.repartidorActivo,
     avisoApuestasActivo: estado.avisoApuestasActivo,
+    practica: estado.practica,
     repartidorId: estado.repartidorActivo && jugadores.length ? jugadores[0].id : null,
     rondaActual: 1,
     cartasRondaActual: null,

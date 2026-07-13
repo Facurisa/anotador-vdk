@@ -123,6 +123,11 @@
             <button class="opcion-tiza" data-valor="51">51</button>
           </div>
 
+          <label class="fila-toggle separada">
+            <span>Partida de prueba (no queda en el historial del grupo)</span>
+            <input type="checkbox" id="truco-practica">
+          </label>
+
           <button class="btn btn-tiza btn-grande" data-accion="empezar-truco">Empezar partida</button>
         </div>
       </div>
@@ -135,6 +140,7 @@
       <div class="pizarra pizarra-truco">
 
         <button class="btn-icono btn-volver-flotante" data-accion="volver-inicio" title="Volver al inicio" aria-label="Volver al inicio">&larr;</button>
+        <p class="insignia-practica oculta" id="truco-insignia-practica">PARTIDA DE PRUEBA &middot; no se guarda</p>
 
         <div class="truco-zona-superior">
           <div class="linea-divisoria-v"></div>
@@ -223,6 +229,11 @@
             <input type="checkbox" id="podrida-toggle-aviso" checked>
           </label>
 
+          <label class="fila-toggle separada">
+            <span>Partida de prueba (no queda en el historial del grupo)</span>
+            <input type="checkbox" id="podrida-practica">
+          </label>
+
           <button class="btn btn-tiza btn-grande" data-accion="empezar-podrida">Empezar partida</button>
         </div>
       </div>
@@ -239,6 +250,7 @@
             <p class="info-ronda" id="podrida-info-ronda">Ronda 1 &mdash; 1 carta</p>
             <button class="btn-link" data-accion="ver-historial-rondas">Ver rondas</button>
           </div>
+          <p class="insignia-practica oculta" id="podrida-insignia-practica">PARTIDA DE PRUEBA &middot; no se guarda</p>
 
           <div class="tabla-posiciones" id="podrida-tabla"></div>
 

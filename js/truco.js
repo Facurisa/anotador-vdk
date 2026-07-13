@@ -11,9 +11,10 @@ let ignorarToques = false; // se pone true justo cuando se gana un chico, hasta 
 let selectorTrucoA = null;
 let selectorTrucoB = null;
 
-function estadoInicial(objetivo = 40) {
+function estadoInicial(objetivo = 40, practica = false) {
   return {
     objetivo,
+    practica,
     equipos: [
       { nombre: 'Nosotros', puntos: 0, chicos: 0, personas: [] },
       { nombre: 'Ellos', puntos: 0, chicos: 0, personas: [] },
@@ -70,6 +71,7 @@ export function prepararConfig() {
   selector.querySelectorAll('.opcion-tiza').forEach((btn) => {
     btn.classList.toggle('activa', Number(btn.dataset.valor) === base.objetivo);
   });
+  document.getElementById('truco-practica').checked = false;
 }
 
 function initSelectorObjetivo() {
@@ -86,7 +88,8 @@ function empezarTruco() {
   const nombreA = document.getElementById('truco-nombre-a').value.trim() || 'Nosotros';
   const nombreB = document.getElementById('truco-nombre-b').value.trim() || 'Ellos';
   const objetivo = Number(document.querySelector('#truco-objetivo-selector .opcion-tiza.activa').dataset.valor);
-  estado = estadoInicial(objetivo);
+  const practica = document.getElementById('truco-practica').checked;
+  estado = estadoInicial(objetivo, practica);
   estado.equipos[0].nombre = nombreA;
   estado.equipos[1].nombre = nombreB;
   estado.equipos[0].personas = selectorTrucoA.obtener();
@@ -153,19 +156,21 @@ function ganarChico(equipoIdx) {
   eq.chicos += 1;
   persistir();
   renderTrofeos();
-  agregarAlHistorial({
-    tipo: 'truco',
-    fecha: Date.now(),
-    equipoA: estado.equipos[0].nombre,
-    equipoB: estado.equipos[1].nombre,
-    puntosA: estado.equipos[0].puntos,
-    puntosB: estado.equipos[1].puntos,
-    ganador: eq.nombre,
-    objetivo: estado.objetivo,
-    personasA: estado.equipos[0].personas || [],
-    personasB: estado.equipos[1].personas || [],
-    equipoGanadorIdx: equipoIdx,
-  });
+  if (!estado.practica) {
+    agregarAlHistorial({
+      tipo: 'truco',
+      fecha: Date.now(),
+      equipoA: estado.equipos[0].nombre,
+      equipoB: estado.equipos[1].nombre,
+      puntosA: estado.equipos[0].puntos,
+      puntosB: estado.equipos[1].puntos,
+      ganador: eq.nombre,
+      objetivo: estado.objetivo,
+      personasA: estado.equipos[0].personas || [],
+      personasB: estado.equipos[1].personas || [],
+      equipoGanadorIdx: equipoIdx,
+    });
+  }
   document.getElementById('ganador-nombre').textContent = eq.nombre;
   ui.abrirOverlay('overlay-ganador-truco');
 }
@@ -193,6 +198,7 @@ function renderTodo() {
   renderNombres();
   renderPuntajes();
   renderTrofeos();
+  document.getElementById('truco-insignia-practica').classList.toggle('oculta', !estado.practica);
 }
 
 function renderNombres() {
@@ -346,7 +352,7 @@ function abrirMenu() {
     if (await ui.confirmar('¿Reiniciar toda la partida? Se pierden los fantasmas ganados.')) {
       const nombres = [estado.equipos[0].nombre, estado.equipos[1].nombre];
       const personas = [estado.equipos[0].personas, estado.equipos[1].personas];
-      estado = estadoInicial(estado.objetivo);
+      estado = estadoInicial(estado.objetivo, estado.practica);
       estado.equipos[0].nombre = nombres[0];
       estado.equipos[1].nombre = nombres[1];
       estado.equipos[0].personas = personas[0];
