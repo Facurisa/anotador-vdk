@@ -26,7 +26,7 @@
 
           <div class="tarjeta-juego">
             <h2>Crear un grupo nuevo</h2>
-            <p style="text-align:center;opacity:.7;font-size:.9rem;">Vas a ser el primero. Despu&eacute;s le pas&aacute;s el c&oacute;digo a tus amigos para que se unan.</p>
+            <p style="text-align:center;opacity:.7;font-size:.9rem;">Vas a ser el primero. Ah&iacute; mismo pod&eacute;s cargar los nombres de tus amigos, y despu&eacute;s les pas&aacute;s el c&oacute;digo para que se unan.</p>
             <button class="btn btn-tiza btn-grande" data-accion="crear-grupo">Crear grupo</button>
           </div>
 
@@ -321,9 +321,10 @@
 
           <div class="fila-agregar-jugador">
             <input class="input-tiza" type="text" id="personas-nuevo-nombre" maxlength="16" placeholder="Nombre">
-            <button class="btn btn-tiza" data-accion="agregar-persona">Agregar</button>
+            <button class="btn btn-tiza" data-accion="agregar-persona" id="personas-btn-agregar">Agregar</button>
           </div>
           <div class="paleta-colores" id="personas-paleta"></div>
+          <button class="btn-link oculta" id="personas-btn-cancelar-edicion" data-accion="cancelar-edicion-persona">Cancelar edici&oacute;n</button>
 
           <div class="selector-opciones" id="personas-tabs">
             <button class="opcion-tiza activa" data-tab="truco">Truco</button>
@@ -385,6 +386,15 @@
       <p>Tu c&oacute;digo de grupo es:</p>
       <p id="codigo-grupo-mostrado" class="codigo-grupo-grande"></p>
       <p style="opacity:.7;font-size:.9rem;">Compartiselo a tus amigos: cuando instalen la app y toquen "Unirme a un grupo", con este c&oacute;digo van a ver el mismo registro que vos.</p>
+
+      <label class="etiqueta-tiza chica">Carg&aacute; ya los nombres de tu grupo (opcional)</label>
+      <div class="lista-chips" id="grupo-lista-agregados"></div>
+      <div class="fila-agregar-jugador">
+        <input class="input-tiza" type="text" id="grupo-nuevo-nombre" maxlength="16" placeholder="Nombre">
+        <button class="btn btn-tiza" data-accion="grupo-agregar-persona">Agregar</button>
+      </div>
+      <div class="paleta-colores" id="grupo-paleta"></div>
+
       <div class="fila-botones">
         <button class="btn btn-tiza" data-accion="copiar-codigo-grupo">Copiar c&oacute;digo</button>
         <button class="btn btn-tiza-outline" data-accion="continuar-grupo-creado">Continuar</button>

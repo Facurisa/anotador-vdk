@@ -7,6 +7,7 @@ import { COLORES } from './selector-personas.js';
 import { calcularStatsPersonas } from './historial.js';
 
 let colorSeleccionado = null;
+let editandoId = null;
 
 function escapeHtml(texto) {
   const div = document.createElement('div');
@@ -27,15 +28,45 @@ function agregarPersona() {
   const nombre = input.value.trim().slice(0, 16);
   if (!nombre) { ui.toast('Escribí un nombre'); return; }
   const lista = nube.obtenerPersonas();
-  if (lista.some((p) => p.nombre.toLowerCase() === nombre.toLowerCase())) { ui.toast('Ya existe una persona con ese nombre'); return; }
+  if (lista.some((p) => p.nombre.toLowerCase() === nombre.toLowerCase() && p.id !== editandoId)) { ui.toast('Ya existe una persona con ese nombre'); return; }
+  if (editandoId) {
+    nube.guardarPersonaNube({ id: editandoId, nombre, color: colorSeleccionado || COLORES[0].valor });
+    ui.toast('Nombre actualizado');
+    cancelarEdicion();
+    return;
+  }
   nube.guardarPersonaNube({ id: nuevoId(), nombre, color: colorSeleccionado || COLORES[0].valor });
   input.value = '';
   colorSeleccionado = null;
   renderPaleta();
 }
 
+function iniciarEdicion(id) {
+  const p = nube.obtenerPersonas().find((x) => x.id === id);
+  if (!p) return;
+  editandoId = id;
+  colorSeleccionado = p.color;
+  const input = document.getElementById('personas-nuevo-nombre');
+  input.value = p.nombre;
+  input.focus();
+  document.getElementById('personas-btn-agregar').textContent = 'Guardar cambios';
+  document.getElementById('personas-btn-cancelar-edicion').classList.remove('oculta');
+  renderPaleta();
+  input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelarEdicion() {
+  editandoId = null;
+  colorSeleccionado = null;
+  document.getElementById('personas-nuevo-nombre').value = '';
+  document.getElementById('personas-btn-agregar').textContent = 'Agregar';
+  document.getElementById('personas-btn-cancelar-edicion').classList.add('oculta');
+  renderPaleta();
+}
+
 async function borrarPersona(id) {
   if (await ui.confirmar('¿Borrar esta persona? Sus estadísticas ya jugadas quedan en el historial, pero no vas a poder elegirla para partidas nuevas.')) {
+    if (editandoId === id) cancelarEdicion();
     await nube.borrarPersonaNube(id);
   }
 }
@@ -46,6 +77,7 @@ function tarjetaPersona(p, filasStatsHtml) {
       <div class="tarjeta-persona-cabecera">
         ${ui.svgFantasma(p.color, 30)}
         <span class="nombre-jugador" style="flex:1;font-size:1.1rem">${escapeHtml(p.nombre)}</span>
+        <button class="btn-link" data-editar-persona="${p.id}" style="margin:0 8px 0 0">Editar</button>
         <button class="btn-link btn-peligro" data-borrar-persona="${p.id}" style="margin:0">Borrar</button>
       </div>
       <div class="tarjeta-persona-stats">
@@ -113,6 +145,8 @@ function initTabs() {
 function initBorrar() {
   ['personas-lista-truco', 'personas-lista-podrida'].forEach((id) => {
     document.getElementById(id).addEventListener('click', (e) => {
+      const btnEditar = e.target.closest('[data-editar-persona]');
+      if (btnEditar) { iniciarEdicion(btnEditar.dataset.editarPersona); return; }
       const btn = e.target.closest('[data-borrar-persona]');
       if (!btn) return;
       borrarPersona(btn.dataset.borrarPersona);
@@ -136,4 +170,5 @@ export function init() {
 
 export const acciones = {
   'agregar-persona': agregarPersona,
+  'cancelar-edicion-persona': cancelarEdicion,
 };

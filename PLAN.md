@@ -5,7 +5,8 @@ App para anotar puntajes de **Truco** y **Podrida**, pensada para usar en el cel
 ## Plataforma y tecnología
 
 - **App web (PWA)** en vanilla HTML + CSS + JavaScript. Sin frameworks, sin npm, sin build.
-- Archivos: `index.html`, `css/estilos.css`, `js/app.js`, `js/truco.js`, `js/podrida.js`, `js/personas.js`, `js/selector-personas.js`, `js/historial.js`, `js/ui.js`, `js/storage.js`, `manifest.json`, `sw.js` (service worker para que funcione offline), íconos en `iconos/`.
+- Archivos: `index.html`, `css/estilos.css`, `js/app.js`, `js/truco.js`, `js/podrida.js`, `js/personas.js`, `js/selector-personas.js`, `js/historial.js`, `js/ui.js`, `js/storage.js`, `js/grupo.js`, `js/nube.js`, `manifest.json`, `sw.js` (service worker para que funcione offline), íconos en `iconos/`.
+- **Publicada en GitHub Pages**: `https://facurisa.github.io/anotador-vdk/` (repo público `Facurisa/anotador-vdk`). Cada `git push` a `main` republica sola en un minuto o dos.
 - **Scroll interno**: todas las pantallas con scroll usan un wrapper `.pizarra-interior-scroll` separado del marco redondeado de afuera — así la barra nativa del navegador nunca "corta" las esquinas redondeadas (los navegadores no redondean su propia scrollbar).
 - **Persistencia con `localStorage`**: la partida en curso se guarda en cada acción. Si se cierra el navegador o se apaga la pantalla, al volver a abrir sigue todo igual.
 - Se instala con "Agregar a pantalla de inicio" del navegador. Debe verse bien en pantalla de celular vertical (probar ~390×844).
@@ -24,9 +25,25 @@ Estilo **pizarrón** en toda la app (ver `referencia-truco.jpeg` en esta carpeta
 - Elementos dibujados como con tiza: líneas divisorias irregulares, botón "Menú" con borde tiza como en la referencia.
 - Los colores de los jugadores de la podrida son tizas de colores (pasteles vivos que contrasten sobre negro), mostrados con el ícono de fantasma en vez de un círculo.
 
+## Registro compartido por grupo (nube)
+
+El historial y las personas guardadas **ya no viven solo en el dispositivo**: se sincronizan por Firestore (Firebase) entre todos los que se unan al mismo grupo, para que cualquiera del grupo VDK vea el registro general en vez de solo lo que jugó en su propio celular.
+
+- **Pantalla de grupo** (`js/grupo.js`, `pantalla-grupo`): es la primera pantalla que ve alguien que abre la app sin un grupo guardado todavía. Dos opciones:
+  - **Crear un grupo nuevo**: genera un código corto de 6 caracteres (`generarCodigoGrupo()` en `js/nube.js`, sin caracteres confundibles como 0/O/1/I/L), lo guarda en `localStorage` (`anotador.codigoGrupo`) y muestra un overlay con el código para copiar y pasarles a los amigos. Si el dispositivo ya tenía personas/historial cargado de antes (pruebas locales), se migra automáticamente a la nube (`migrarDatosLocales()`) para no perderlo.
+  - **Unirme a un grupo**: se escribe el código que pasó otro; valida que tenga al menos 4 caracteres y arranca a escuchar los datos de ese grupo.
+  - Una vez que hay grupo guardado, la app arranca directo en el inicio (`grupo.iniciarSiYaHayGrupo()` + listeners de Firestore) sin volver a pedir el código.
+  - El código del grupo actual se ve siempre en la pantalla "Personas" (con botón para copiarlo) por si hay que pasárselo a alguien más.
+- **Acceso**: solo con el código de grupo (sin login/contraseña) — decisión explícita de Facundo, simple para el grupo de amigos. Las reglas de seguridad de Firestore permiten leer/escribir `grupos/{codigo}/historial` y `grupos/{codigo}/personas` a cualquiera que tenga el código, pero **niegan leer la lista de grupos en sí** (no se puede "adivinar" códigos ajenos por fuerza bruta enumerando la colección).
+- **Offline-first nativo**: Firestore se inicializa con `initializeFirestore(app, { localCache: persistentLocalCache() })`, que guarda todo en IndexedDB y encola los cambios hechos sin señal — se suben solos apenas vuelve la conexión, sin código de cola manual. Confirmado por decisión explícita de Facundo ("se guarda igual y se sincroniza cuando vuelva la señal").
+- **Fecha y hora exactas por partida**: cada entrada del historial guarda su timestamp real (`fecha`) al momento de terminar la partida, y se muestra formateado (ej. "13/07/2026, 12:39 p. m.") en la lista de partidas — pedido explícito de Facundo para poder verificar que nadie anotó partidos inventados.
+- **SDK de Firebase por CDN** (`gstatic.com`, no local): es un paquete pensado para usarse así sin bundler; el service worker lo cachea igual para que la app siga arrancando offline una vez que se usó al menos una vez con internet. El `fetch` del service worker está limitado a recursos propios + ese CDN, para no interferir con las llamadas en tiempo real de Firestore.
+- Módulo central: `js/nube.js` (listeners `onSnapshot`, caché en memoria, funciones `agregarAlHistorialNube`/`guardarPersonaNube`/`borrarPersonaNube`/`borrarHistorialNube`). `historial.js` y `personas.js` ya no leen/escriben `localStorage` directo para estos datos: todo pasa por `nube.js`, con los módulos de UI suscritos vía `onHistorialCambia`/`onPersonasCambia` para re-renderizar solos cuando cambia algo (local o de otro dispositivo).
+- **Personas sin duplicar entre dispositivos**: al guardar una persona nueva, `selector-personas.js` busca primero si ya existe alguien con ese nombre en la caché del grupo (sin importar mayúsculas) y reutiliza su `id` en vez de crear un registro repetido.
+
 ## Personas (roster compartido)
 
-- `anotador.personas` en localStorage: lista compartida de gente guardada (`{id, nombre, color}`), usada tanto por el truco como por la podrida — una persona agregada en un juego aparece como sugerencia rápida en el otro.
+- Lista compartida de gente guardada (`{id, nombre, color}`) en Firestore (ver sección de arriba), usada tanto por el truco como por la podrida — una persona agregada en un juego aparece como sugerencia rápida en el otro, y en cualquier dispositivo del grupo.
 - Componente reutilizable `js/selector-personas.js` (`crearSelectorPersonas`): agregar/quitar personas de una lista, paleta de colores sin repetidos dentro de esa lista, accesos rápidos a personas guardadas. Se usa 3 veces: podrida (una lista) y truco (una lista por equipo, con exclusión mutua para que la misma persona no quede en los dos equipos a la vez).
 - **Pantalla "Personas"** (`js/personas.js`, accesible desde el inicio): directorio con tarjeta por persona, con pestañas **Truco** / **Podrida** para ver las estadísticas de cada juego por separado (no mezcladas). Truco: chicos ganados de X jugados, y **diferencia de puntos acumulada** (+/− sumando `puntos propios − puntos rivales` de cada chico, en verde si es positiva y en rojo si es negativa) — ordenado por ganados y después por diferencia. Podrida: partidas ganadas de X jugadas, % de apuestas cumplidas, puntaje promedio — ordenado por ganadas. Permite agregar o borrar personas directamente. Las estadísticas se recalculan siempre desde el historial (`calcularStatsPersonas()` en `historial.js`), nunca se guardan aparte.
 - **Truco con personas (opcional)**: en la configuración, cada equipo tiene su nombre editable de siempre **más** una sección "¿Quién juega?" para asignar 0 o más personas guardadas a ese equipo (no es obligatorio, es solo para llevar estadísticas). Al ganar un chico, se guarda en el historial qué personas estaban en cada equipo y cuál ganó, para poder calcular sus stats.
@@ -100,7 +117,7 @@ La app calcula los puntos sola; nunca se anotan puntos a mano (pero ver "corregi
 ## Funciones comunes a los dos juegos
 
 - **Candado anti-toques**: botón discreto (candado de tiza) en la pantalla de juego que bloquea toda anotación, para cuando el celular queda en la mesa o pasa de mano. Tocarlo de nuevo (con toque largo o doble toque, para que no se destrabe solo) desbloquea.
-- **Historial de partidas terminadas** (`anotador.historial` en localStorage): cada partida que termina se guarda con fecha, jugadores/equipos y resultado. Pantalla "Historial" accesible desde el inicio con:
+- **Historial de partidas terminadas** (compartido por grupo en Firestore, ver sección "Registro compartido por grupo"): cada partida que termina se guarda con fecha y hora exactas, jugadores/equipos y resultado. Pantalla "Historial" accesible desde el inicio con:
   - Lista de partidas pasadas de cada juego.
   - **Estadísticas de truco**: chicos ganados por equipo/nombres, últimas partidas.
   - **Estadísticas de podrida**: partidas ganadas por jugador, puntaje promedio y **% de apuestas cumplidas** de cada uno (histórico, para el ranking del grupo).
