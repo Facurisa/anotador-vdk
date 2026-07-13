@@ -133,7 +133,7 @@ function aplicarDelta(equipoIdx, delta) {
   if (nuevo >= estado.objetivo) {
     ignorarToques = true;
     celebrarFinDeChico(equipoIdx);
-    setTimeout(() => ganarChico(equipoIdx), 1300);
+    setTimeout(() => ganarChico(equipoIdx), 3500);
   }
 }
 
@@ -148,7 +148,7 @@ function celebrarFinDeChico(equipoIdx) {
   setTimeout(() => {
     ladoGanador.classList.remove('celebracion-ganador');
     ladoPerdedor.classList.remove('celebracion-perdedor');
-  }, 1300);
+  }, 3500);
 }
 
 function ganarChico(equipoIdx) {
