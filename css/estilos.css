@@ -299,6 +299,54 @@ h1, h2, h3, p { margin: 0 0 10px; }
   justify-content: flex-start;
   padding-top: max(28px, env(safe-area-inset-top));
   height: 100%;
+  position: relative;
+}
+
+/* ============ Festejo al ganar un chico: champán del lado ganador, mamadera derramando leche del lado perdedor ============ */
+.celebracion-ganador::before,
+.celebracion-perdedor::before {
+  content: '';
+  position: absolute;
+  top: 42%; left: 50%;
+  font-size: clamp(3.4rem, 15vw, 5.6rem);
+  pointer-events: none;
+  z-index: 3;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.4));
+}
+.celebracion-ganador::after,
+.celebracion-perdedor::after {
+  content: '';
+  position: absolute;
+  top: 42%; left: 50%;
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
+  pointer-events: none;
+  z-index: 3;
+}
+.celebracion-ganador::before { content: '🍾'; animation: pop-champan 1.3s ease-out; }
+.celebracion-ganador::after { content: '🎉✨'; animation: confeti-lateral 1.3s ease-out; }
+.celebracion-perdedor::before { content: '🍼'; animation: tumbar-mamadera 1.3s ease-out; }
+.celebracion-perdedor::after { content: '💧💧'; animation: gotas-leche 1.1s ease-in .3s both; }
+
+@keyframes pop-champan {
+  0% { transform: translate(-50%, -10%) scale(.2) rotate(-15deg); opacity: 0; }
+  25% { transform: translate(-50%, -85%) scale(1.15) rotate(8deg); opacity: 1; }
+  45% { transform: translate(-50%, -70%) scale(1) rotate(-4deg); }
+  100% { transform: translate(-50%, -55%) scale(1) rotate(0deg); opacity: 0; }
+}
+@keyframes confeti-lateral {
+  0% { transform: translate(-160%, -20%) scale(.5) rotate(0deg); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translate(70%, -170%) scale(1.1) rotate(70deg); opacity: 0; }
+}
+@keyframes tumbar-mamadera {
+  0% { transform: translate(-50%, -50%) rotate(0deg) scale(.5); opacity: 0; }
+  30% { transform: translate(-50%, -50%) rotate(100deg) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(105deg) scale(1); opacity: .85; }
+}
+@keyframes gotas-leche {
+  0% { transform: translate(20%, -20%) scale(.6); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translate(45%, 140%) scale(.8); opacity: 0; }
 }
 .nombre-equipo {
   font-size: clamp(1.3rem, 6vw, 1.7rem);

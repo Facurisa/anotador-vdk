@@ -76,7 +76,7 @@ El historial y las personas guardadas **ya no viven solo en el dispositivo**: se
   - Vibración corta (`navigator.vibrate(30)`) al anotar, si el dispositivo lo soporta.
   - Feedback visual: el número hace una animación breve al cambiar.
 - No pasarse del objetivo: si el equipo está a 2 del final, un +3 lo deja clavado en el puntaje objetivo.
-- **Al llegar al objetivo**: overlay de ganador ("¡Ganaron Nosotros!"), se suma un **fantasma** al equipo (chicos ganados, ícono de fantasma en vez de trofeo) y botón "Otro chico" que pone 0–0 manteniendo fantasmas y nombres.
+- **Al llegar al objetivo**: primero un festejo breve (1.3s) directo sobre la pizarra, con animación de tiza — del lado ganador un champán descorchando (🍾 + confeti), del lado perdedor una mamadera volcándose y goteando leche (🍼 + gotas, el clásico chiste del truco) — y recién después se abre el overlay de ganador ("¡Ganó Nosotros!"), se suma un **fantasma** al equipo (chicos ganados, ícono de fantasma en vez de trofeo) y aparece el botón "Otro chico" que pone 0–0 manteniendo fantasmas y nombres.
 - Botón **deshacer** (flecha curva de tiza, discreta cerca del menú): revierte el último cambio de puntaje. Guardar un historial de acciones para poder deshacer varias veces.
 - Botón **Menú** abajo al centro (como la referencia): reiniciar puntos, reiniciar todo (incluye trofeos), cambiar objetivo 40/51, mantener pantalla encendida, volver al inicio. Confirmar antes de reiniciar.
 

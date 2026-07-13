@@ -1,6 +1,6 @@
 // Service worker: cachea todo lo necesario para que la app funcione sin internet.
 // Si cambiás archivos de la app, subí el número de VERSION para que los celulares bajen la versión nueva.
-const VERSION = 'anotador-v11';
+const VERSION = 'anotador-v12';
 
 const ARCHIVOS = [
   './',

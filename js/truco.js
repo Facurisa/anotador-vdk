@@ -37,20 +37,25 @@ function etapaDe(equipo) {
 
 function inicializarSelectoresPersonas() {
   if (selectorTrucoA) return;
+  // Ojo: crearSelectorPersonas() se suscribe a nube.onPersonasCambia(), que
+  // llama al callback de una sola vez (síncrono) apenas se suscribe. Por eso,
+  // mientras se está creando el selector A, el selector B todavía no existe
+  // (se crea en la línea siguiente) — hay que cubrir ese caso con "?." o el
+  // primer render de A explota.
   selectorTrucoA = crearSelectorPersonas({
     lista: 'truco-a-lista-personas',
     input: 'truco-a-nuevo-nombre',
     paleta: 'truco-a-paleta',
     guardadosWrap: 'truco-a-guardados-wrap',
     guardadosLista: 'truco-a-lista-guardados',
-  }, { excluidos: () => selectorTrucoB.obtener().map((p) => p.id) });
+  }, { excluidos: () => selectorTrucoB ? selectorTrucoB.obtener().map((p) => p.id) : [] });
   selectorTrucoB = crearSelectorPersonas({
     lista: 'truco-b-lista-personas',
     input: 'truco-b-nuevo-nombre',
     paleta: 'truco-b-paleta',
     guardadosWrap: 'truco-b-guardados-wrap',
     guardadosLista: 'truco-b-lista-guardados',
-  }, { excluidos: () => selectorTrucoA.obtener().map((p) => p.id) });
+  }, { excluidos: () => selectorTrucoA ? selectorTrucoA.obtener().map((p) => p.id) : [] });
 }
 
 export function prepararConfig() {
@@ -124,8 +129,23 @@ function aplicarDelta(equipoIdx, delta) {
   ui.vibrar(30);
   if (nuevo >= estado.objetivo) {
     ignorarToques = true;
-    setTimeout(() => ganarChico(equipoIdx), 200);
+    celebrarFinDeChico(equipoIdx);
+    setTimeout(() => ganarChico(equipoIdx), 1300);
   }
+}
+
+// Festejo breve antes de abrir el cartel de "¡Ganó...!": champán del lado
+// ganador, mamadera derramando leche del lado perdedor (chiste clásico del truco).
+function celebrarFinDeChico(equipoIdx) {
+  const perdedorIdx = equipoIdx === 0 ? 1 : 0;
+  const ladoGanador = document.querySelector(`[data-lado="${equipoIdx}"]`);
+  const ladoPerdedor = document.querySelector(`[data-lado="${perdedorIdx}"]`);
+  ladoGanador.classList.add('celebracion-ganador');
+  ladoPerdedor.classList.add('celebracion-perdedor');
+  setTimeout(() => {
+    ladoGanador.classList.remove('celebracion-ganador');
+    ladoPerdedor.classList.remove('celebracion-perdedor');
+  }, 1300);
 }
 
 function ganarChico(equipoIdx) {
