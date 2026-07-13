@@ -1,11 +1,12 @@
 import { storage, nuevoId } from './storage.js';
 import * as ui from './ui.js';
-import { agregarAlHistorial, compartirImagen } from './historial.js';
+import { agregarAlHistorial, agregarFotoAPartida, compartirImagen } from './historial.js';
 import { crearSelectorPersonas, guardarPersona, COLORES } from './selector-personas.js';
 
 let estado = null;
 let edicionTemporal = null;
 let selectorPodrida = null;
+let entradaHistorialPendiente = null; // id de la entrada recién guardada, para poder adjuntarle una foto
 
 // Estado transitorio de la pantalla de configuración (antes de empezar la partida)
 let configMaxCartas = 7;
@@ -246,7 +247,7 @@ function participantesRonda() {
 }
 
 function iniciarFaseApuestas() {
-  if (estado.rondaActual > totalRondas()) { finalizarPartida(); return; }
+  if (estado.rondaActual > totalRondas()) { mostrarPodio(guardarResultadoPodrida()); return; }
   const activos = jugadoresActivos();
   const orden = ordenTurno(activos);
   estado.ordenRondaIds = orden.map((j) => j.id);
@@ -429,6 +430,12 @@ function terminarRonda() {
     ganadas: { ...estado.resultados },
     puntos: puntosRonda,
   });
+  // Si esta era la última ronda, guardar el resultado YA (antes de la
+  // animación de reordenar la tabla): si alguien cierra la app en ese
+  // momento, el resultado ya tiene que haber quedado guardado igual.
+  const esUltimaRonda = estado.rondaActual >= totalRondas();
+  const ordenados = esUltimaRonda ? guardarResultadoPodrida() : null;
+
   mostrarDiferencias(puntosRonda);
   rotarRepartidor();
   estado.rondaActual += 1;
@@ -438,7 +445,7 @@ function terminarRonda() {
   setTimeout(() => {
     renderTabla(true);
     setTimeout(() => {
-      if (estado.rondaActual > totalRondas()) finalizarPartida();
+      if (esUltimaRonda) mostrarPodio(ordenados);
       else iniciarFaseApuestas();
     }, 500);
   }, 700);
@@ -446,7 +453,9 @@ function terminarRonda() {
 
 /* ================= Fin de partida ================= */
 
-function finalizarPartida() {
+// Solo la parte de datos: calcula las estadísticas finales y las guarda en el
+// historial compartido (si no es partido amistoso). No toca nada visual.
+function guardarResultadoPodrida() {
   estado.terminado = true;
   persistir();
 
@@ -463,15 +472,24 @@ function finalizarPartida() {
   });
   const ordenados = [...statsJugadores].sort((a, b) => b.puntaje - a.puntaje);
 
+  entradaHistorialPendiente = null;
   if (!estado.practica) {
-    agregarAlHistorial({
+    entradaHistorialPendiente = agregarAlHistorial({
       tipo: 'podrida',
       jugadores: statsJugadores,
       ganador: ordenados[0].nombre,
     });
   }
+  return ordenados;
+}
 
+// Solo la parte visual: podio, tabla y overlay. Se llama después de que el
+// resultado ya está guardado (ver guardarResultadoPodrida). Ofrece sacarle
+// una foto opcional a la pizarra como respaldo extra del resultado.
+function mostrarPodio(ordenados) {
   renderPodio(ordenados);
+  const idEntrada = entradaHistorialPendiente;
+  ui.prepararFotoOpcional('podrida', idEntrada, (archivo) => agregarFotoAPartida(idEntrada, archivo));
   ui.abrirOverlay('overlay-fin-podrida');
 }
 

@@ -1,6 +1,6 @@
 import { storage } from './storage.js';
 import * as ui from './ui.js';
-import { agregarAlHistorial, compartirImagen } from './historial.js';
+import { agregarAlHistorial, agregarFotoAPartida, compartirImagen } from './historial.js';
 import { crearSelectorPersonas } from './selector-personas.js';
 
 const UMBRAL_SWIPE = 30; // px para distinguir toque de deslizar
@@ -11,6 +11,7 @@ let undoStack = [];
 let ignorarToques = false; // se pone true justo cuando se gana un chico, hasta "otro chico"
 let selectorTrucoA = null;
 let selectorTrucoB = null;
+let entradaHistorialPendiente = null; // id de la entrada recién guardada, para poder adjuntarle una foto
 
 function estadoInicial(objetivo = 40, practica = false) {
   return {
@@ -133,8 +134,13 @@ function aplicarDelta(equipoIdx, delta) {
   ui.vibrar(30);
   if (nuevo >= estado.objetivo) {
     ignorarToques = true;
+    // El resultado se guarda YA, antes de mostrar ningún festejo ni cartel:
+    // si alguien cierra la app en ese momento (por ejemplo porque perdió), el
+    // chico ya tiene que haber quedado guardado. El festejo es solo estético
+    // y no debe poder demorar ni bloquear el guardado real.
+    guardarResultadoChico(equipoIdx);
     celebrarFinDeChico(equipoIdx);
-    setTimeout(() => ganarChico(equipoIdx), DURACION_FESTEJO);
+    setTimeout(() => mostrarCartelGanador(equipoIdx), DURACION_FESTEJO);
   }
 }
 
@@ -169,13 +175,14 @@ function celebrarFinDeChico(equipoIdx) {
   }, DURACION_FESTEJO);
 }
 
-function ganarChico(equipoIdx) {
+function guardarResultadoChico(equipoIdx) {
   const eq = estado.equipos[equipoIdx];
   eq.chicos += 1;
   persistir();
   renderTrofeos();
+  entradaHistorialPendiente = null;
   if (!estado.practica) {
-    agregarAlHistorial({
+    entradaHistorialPendiente = agregarAlHistorial({
       tipo: 'truco',
       equipoA: estado.equipos[0].nombre,
       equipoB: estado.equipos[1].nombre,
@@ -188,7 +195,16 @@ function ganarChico(equipoIdx) {
       equipoGanadorIdx: equipoIdx,
     });
   }
+}
+
+// Solo la parte visual: se llama después del festejo, con el resultado ya
+// guardado hace rato (ver guardarResultadoChico). Ofrece sacarle una foto
+// opcional a la pizarra como respaldo extra del resultado.
+function mostrarCartelGanador(equipoIdx) {
+  const eq = estado.equipos[equipoIdx];
   document.getElementById('ganador-nombre').textContent = eq.nombre;
+  const idEntrada = entradaHistorialPendiente;
+  ui.prepararFotoOpcional('truco', idEntrada, (archivo) => agregarFotoAPartida(idEntrada, archivo));
   ui.abrirOverlay('overlay-ganador-truco');
 }
 

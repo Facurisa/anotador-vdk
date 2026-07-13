@@ -177,6 +177,13 @@
     <div class="overlay oculta" id="overlay-ganador-truco">
       <div class="overlay-contenido">
         <p class="texto-ganador">&iexcl;Gan&oacute; <span id="ganador-nombre"></span>!</p>
+
+        <div class="fila-foto-opcional" id="truco-fila-foto" hidden>
+          <button type="button" class="btn-link" id="truco-btn-foto">&#128247; Sacar foto de la pizarra (opcional)</button>
+          <input type="file" accept="image/*" capture="environment" id="truco-input-foto" hidden>
+          <p class="estado-foto" id="truco-estado-foto"></p>
+        </div>
+
         <div class="fila-botones">
           <button class="btn btn-tiza btn-grande" data-accion="otro-chico">Otro chico</button>
         </div>
@@ -313,6 +320,13 @@
         <h2 class="titulo-pantalla">&iexcl;Termin&oacute; la partida!</h2>
         <div id="podio-podrida"></div>
         <div id="tabla-final-podrida"></div>
+
+        <div class="fila-foto-opcional" id="podrida-fila-foto" hidden>
+          <button type="button" class="btn-link" id="podrida-btn-foto">&#128247; Sacar foto de la pizarra (opcional)</button>
+          <input type="file" accept="image/*" capture="environment" id="podrida-input-foto" hidden>
+          <p class="estado-foto" id="podrida-estado-foto"></p>
+        </div>
+
         <div class="fila-botones">
           <button class="btn btn-tiza" data-accion="compartir-podrida">Compartir</button>
           <button class="btn btn-tiza" data-accion="revancha-podrida">Revancha</button>
