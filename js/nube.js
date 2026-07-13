@@ -108,12 +108,6 @@ export async function borrarPersonaNube(id) {
   await deleteDoc(doc(db, 'grupos', codigo, 'personas', id));
 }
 
-export async function borrarHistorialNube() {
-  const codigo = grupoActivo();
-  if (!codigo) return;
-  await Promise.all(cacheHistorial.map((it) => deleteDoc(doc(db, 'grupos', codigo, 'historial', it.id))));
-}
-
 // Al crear un grupo nuevo, sube de una sola vez lo que ya hubiera guardado
 // localmente en este dispositivo (partidas de prueba, personas cargadas antes
 // de que existiera el grupo), para no perder ese historial.

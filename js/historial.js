@@ -138,22 +138,15 @@ function initTabs() {
   });
 }
 
-async function borrarHistorial() {
-  if (await ui.confirmar('¿Borrar todo el historial del grupo? No se puede deshacer, y afecta a todos.')) {
-    await nube.borrarHistorialNube();
-    renderPantalla();
-    ui.toast('Historial borrado');
-  }
-}
-
 export function init() {
   initTabs();
   nube.onHistorialCambia(() => renderPantalla());
 }
 
-export const acciones = {
-  'borrar-historial': borrarHistorial,
-};
+// Las partidas contadas (no amistosas) quedan fijas: no hay forma de borrar ni
+// corregir el historial del grupo una vez guardado, para que sea un registro
+// confiable de verdad (nadie puede "hacer desaparecer" una derrota).
+export const acciones = {};
 
 /* ---------------- Compartir resultado como imagen ---------------- */
 
