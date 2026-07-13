@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /grupos/{codigo} {
+      // Nadie puede leer/enumerar la lista de grupos en sí (solo se puede
+      // "entrar" a un grupo si ya sabés el código, no adivinándolo).
+      allow read, write: if false;
+
+      match /personas/{personaId} {
+        allow read, create, update, delete: if true;
+      }
+
+      match /historial/{entradaId} {
+        allow read: if true;
+        // Se puede crear una partida nueva, pero la fecha tiene que ser la
+        // hora real del servidor (serverTimestamp) — bloquea fechas
+        // inventadas por un cliente.
+        allow create: if request.resource.data.fecha == request.time
+                       && request.resource.data.tipo in ['truco', 'podrida'];
+        // Una vez guardada, ninguna partida se puede editar ni borrar: ni
+        // desde la app (no hay botón) ni llamando al SDK a mano.
+        allow update, delete: if false;
+      }
+    }
+  }
+}

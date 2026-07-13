@@ -6,6 +6,18 @@ import * as historial from './historial.js';
 import * as personas from './personas.js';
 import * as grupo from './grupo.js';
 
+// Las reglas de Firestore bloquean editar/borrar el historial y falsificar la
+// fecha (ver PLAN.md). Si alguien lo intenta llamando al SDK directo desde la
+// consola del navegador (sin manejar el error con .catch), el rechazo llega
+// acá como promesa no atrapada — un guiño para el que se cree gracioso.
+window.addEventListener('unhandledrejection', (event) => {
+  if (event.reason && event.reason.code === 'permission-denied') {
+    console.log('%cDamian, no hagas trampa 😏', 'font-size:20px;color:#ffd873;font-weight:bold;');
+    ui.toast('Damian, no hagas trampa 😏');
+    event.preventDefault();
+  }
+});
+
 function refrescarInicio() {
   const resumenTruco = truco.resumenGuardado();
   document.querySelector('[data-estado-truco]').hidden = !resumenTruco;
