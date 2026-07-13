@@ -70,7 +70,9 @@ function jugadoresActivos() {
 }
 
 function puntajeDe(jugador) {
-  return estado.rondas.reduce((acc, r) => acc + (r.puntos[jugador.id] || 0), 0);
+  const base = estado.rondas.reduce((acc, r) => acc + (r.puntos[jugador.id] || 0), 0);
+  const ajuste = (estado.ajustes && estado.ajustes[jugador.id]) || 0;
+  return base + ajuste;
 }
 
 function calcularPuntos(apostado, ganadas) {
@@ -127,6 +129,7 @@ function empezarPodrida() {
     apuestas: {},
     resultados: {},
     rondas: [],
+    ajustes: {},
     terminado: false,
   };
   persistir();
@@ -497,6 +500,7 @@ function revancha() {
     apuestas: {},
     resultados: {},
     rondas: [],
+    ajustes: {},
     terminado: false,
   };
   persistir();
@@ -655,6 +659,17 @@ function agregarJugadorDesdeMenu() {
   const guardada = guardarPersona({ id: nuevoId(), nombre, color });
   const nuevo = { ...guardada, activo: true };
   estado.jugadores.push(nuevo);
+
+  // Se suma a mitad de partida: en vez de arrancar en 0 (quedando en desventaja
+  // frente a rondas que ya se jugaron), arranca empatado con quien va último.
+  const activosPrevios = jugadoresActivos().filter((j) => j.id !== nuevo.id);
+  if (activosPrevios.length) {
+    const minimo = Math.min(...activosPrevios.map((j) => puntajeDe(j)));
+    if (!estado.ajustes) estado.ajustes = {};
+    estado.ajustes[nuevo.id] = minimo;
+    ui.toast(`${nombre} arranca con ${minimo} puntos, empatado con el último`);
+  }
+
   if (estado.fase === 'apuestas') {
     estado.apuestas[nuevo.id] = 0;
     estado.ordenRondaIds.push(nuevo.id);
@@ -684,6 +699,7 @@ async function reiniciarPartidaPodrida() {
     apuestas: {},
     resultados: {},
     rondas: [],
+    ajustes: {},
     terminado: false,
   };
   persistir();
@@ -776,11 +792,8 @@ export function resumenGuardado() {
   if (!g || g.terminado) return null;
   const activos = g.jugadores.filter((j) => j.activo);
   if (!activos.length) return null;
-  const lider = [...activos].sort((a, b) => {
-    const pa = g.rondas.reduce((acc, r) => acc + (r.puntos[a.id] || 0), 0);
-    const pb = g.rondas.reduce((acc, r) => acc + (r.puntos[b.id] || 0), 0);
-    return pb - pa;
-  })[0];
+  const puntajeGuardado = (j) => g.rondas.reduce((acc, r) => acc + (r.puntos[j.id] || 0), 0) + ((g.ajustes && g.ajustes[j.id]) || 0);
+  const lider = [...activos].sort((a, b) => puntajeGuardado(b) - puntajeGuardado(a))[0];
   return `Ronda ${g.rondaActual} de ${2 * g.maxCartas - 1} — va ganando ${lider.nombre}`;
 }
 
