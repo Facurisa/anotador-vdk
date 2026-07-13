@@ -1,7 +1,8 @@
 // Pantalla "Personas": directorio de gente guardada (compartido entre truco y
 // podrida) con sus estadísticas combinadas.
-import { storage, nuevoId } from './storage.js';
+import { nuevoId } from './storage.js';
 import * as ui from './ui.js';
+import * as nube from './nube.js';
 import { COLORES } from './selector-personas.js';
 import { calcularStatsPersonas } from './historial.js';
 
@@ -25,20 +26,17 @@ function agregarPersona() {
   const input = document.getElementById('personas-nuevo-nombre');
   const nombre = input.value.trim().slice(0, 16);
   if (!nombre) { ui.toast('Escribí un nombre'); return; }
-  const lista = storage.getPersonas();
+  const lista = nube.obtenerPersonas();
   if (lista.some((p) => p.nombre.toLowerCase() === nombre.toLowerCase())) { ui.toast('Ya existe una persona con ese nombre'); return; }
-  lista.push({ id: nuevoId(), nombre, color: colorSeleccionado || COLORES[0].valor });
-  storage.setPersonas(lista);
+  nube.guardarPersonaNube({ id: nuevoId(), nombre, color: colorSeleccionado || COLORES[0].valor });
   input.value = '';
   colorSeleccionado = null;
   renderPaleta();
-  renderPantalla();
 }
 
 async function borrarPersona(id) {
   if (await ui.confirmar('¿Borrar esta persona? Sus estadísticas ya jugadas quedan en el historial, pero no vas a poder elegirla para partidas nuevas.')) {
-    storage.setPersonas(storage.getPersonas().filter((p) => p.id !== id));
-    renderPantalla();
+    await nube.borrarPersonaNube(id);
   }
 }
 
@@ -132,6 +130,8 @@ export function init() {
   renderPaleta();
   initTabs();
   initBorrar();
+  nube.onPersonasCambia(() => renderPantalla());
+  nube.onHistorialCambia(() => renderPantalla());
 }
 
 export const acciones = {

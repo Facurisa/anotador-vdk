@@ -1,13 +1,8 @@
-import { storage } from './storage.js';
 import * as ui from './ui.js';
+import * as nube from './nube.js';
 
-const MAX_ENTRADAS = 300;
-
-export function agregarAlHistorial(entrada) {
-  const lista = storage.getHistorial();
-  lista.unshift(entrada);
-  if (lista.length > MAX_ENTRADAS) lista.length = MAX_ENTRADAS;
-  storage.setHistorial(lista);
+export async function agregarAlHistorial(entrada) {
+  await nube.agregarAlHistorialNube(entrada);
 }
 
 function statsVacias(p) {
@@ -24,10 +19,10 @@ function statsVacias(p) {
 // no jugaron ninguna partida (con todo en 0).
 export function calcularStatsPersonas() {
   const mapa = {};
-  storage.getPersonas().forEach((p) => { mapa[p.id] = statsVacias(p); });
+  nube.obtenerPersonas().forEach((p) => { mapa[p.id] = statsVacias(p); });
   const obtener = (p) => { if (!mapa[p.id]) mapa[p.id] = statsVacias(p); return mapa[p.id]; };
 
-  storage.getHistorial().forEach((it) => {
+  nube.obtenerHistorial().forEach((it) => {
     if (it.tipo === 'truco') {
       const diferenciaA = it.puntosA - it.puntosB;
       (it.personasA || []).forEach((p) => {
@@ -126,7 +121,7 @@ function renderTabPodrida(items) {
 }
 
 export function renderPantalla() {
-  const historial = storage.getHistorial();
+  const historial = nube.obtenerHistorial();
   renderTabTruco(historial.filter((h) => h.tipo === 'truco'));
   renderTabPodrida(historial.filter((h) => h.tipo === 'podrida'));
 }
@@ -144,8 +139,8 @@ function initTabs() {
 }
 
 async function borrarHistorial() {
-  if (await ui.confirmar('¿Borrar todo el historial de partidas? No se puede deshacer.')) {
-    storage.setHistorial([]);
+  if (await ui.confirmar('¿Borrar todo el historial del grupo? No se puede deshacer, y afecta a todos.')) {
+    await nube.borrarHistorialNube();
     renderPantalla();
     ui.toast('Historial borrado');
   }
@@ -153,6 +148,7 @@ async function borrarHistorial() {
 
 export function init() {
   initTabs();
+  nube.onHistorialCambia(() => renderPantalla());
 }
 
 export const acciones = {

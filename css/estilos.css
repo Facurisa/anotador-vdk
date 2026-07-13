@@ -396,6 +396,24 @@ h1, h2, h3, p { margin: 0 0 10px; }
   margin-bottom: 18px;
 }
 
+.codigo-grupo-grande {
+  font-size: 2.2rem !important;
+  letter-spacing: 6px;
+  color: var(--tiza-amarillo);
+  margin: 10px 0 18px !important;
+}
+
+.fila-codigo-grupo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: .75;
+  font-size: .9rem;
+  margin-bottom: 14px;
+}
+.fila-codigo-grupo strong { letter-spacing: 2px; color: var(--tiza-amarillo); }
+
 /* ============ Menú: filas de opciones ============ */
 .menu-fila {
   display: flex;

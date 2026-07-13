@@ -4,6 +4,7 @@ import * as truco from './truco.js';
 import * as podrida from './podrida.js';
 import * as historial from './historial.js';
 import * as personas from './personas.js';
+import * as grupo from './grupo.js';
 
 function refrescarInicio() {
   const resumenTruco = truco.resumenGuardado();
@@ -36,7 +37,7 @@ function manejarClicks(e) {
     case 'nueva-podrida': podrida.continuarOIniciar('nueva'); break;
     case 'continuar-podrida': podrida.continuarOIniciar('continuar'); break;
     case 'ir-historial': ui.mostrarPantalla('pantalla-historial'); historial.renderPantalla(); break;
-    case 'ir-personas': ui.mostrarPantalla('pantalla-personas'); personas.renderPantalla(); break;
+    case 'ir-personas': ui.mostrarPantalla('pantalla-personas'); grupo.actualizarCodigoVisible(); personas.renderPantalla(); break;
     case 'volver-inicio': ui.mostrarPantalla('pantalla-inicio'); refrescarInicio(); break;
     case 'candado': ui.candado.activar(); break;
     case 'abrir-menu': abrirMenuSegunPantalla(); break;
@@ -47,7 +48,8 @@ function manejarClicks(e) {
       break;
     }
     default: {
-      const fn = truco.acciones[accion] || podrida.acciones[accion] || historial.acciones[accion] || personas.acciones[accion];
+      const fn = truco.acciones[accion] || podrida.acciones[accion] || historial.acciones[accion]
+        || personas.acciones[accion] || grupo.acciones[accion];
       if (fn) fn();
     }
   }
@@ -76,7 +78,11 @@ async function aplicarConfigInicial() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  grupo.iniciarSiYaHayGrupo();
+  if (grupo.tieneGrupo()) ui.mostrarPantalla('pantalla-inicio');
+
   ui.candado.init();
+  grupo.init();
   truco.init();
   podrida.init();
   historial.init();

@@ -1,9 +1,10 @@
 // Selector de personas reutilizable: agregar/quitar personas a una lista (equipo,
 // jugadores de una partida, etc.), con paleta de colores y accesos rápidos a
-// personas ya guardadas. Se usa en la config de truco (una vez por equipo) y en
-// la de podrida.
-import { storage, nuevoId } from './storage.js';
+// personas ya guardadas (compartidas por todo el grupo vía Firestore). Se usa en
+// la config de truco (una vez por equipo) y en la de podrida.
+import { nuevoId } from './storage.js';
 import * as ui from './ui.js';
+import * as nube from './nube.js';
 
 export const COLORES = [
   { n: 'amarillo', valor: '#ffd873' },
@@ -17,12 +18,14 @@ export const COLORES = [
   { n: 'blanco', valor: '#f5f3ef' },
 ];
 
+// Guarda (o actualiza el color de) una persona en el roster compartido del
+// grupo. Si ya existe alguien con ese nombre en la nube, reutiliza su id en vez
+// de crear un duplicado.
 export function guardarPersona(p) {
-  const lista = storage.getPersonas();
-  const idx = lista.findIndex((g) => g.nombre.toLowerCase() === p.nombre.toLowerCase());
-  if (idx >= 0) lista[idx].color = p.color;
-  else lista.push({ id: p.id, nombre: p.nombre, color: p.color });
-  storage.setPersonas(lista);
+  const existente = nube.obtenerPersonas().find((g) => g.nombre.toLowerCase() === p.nombre.toLowerCase());
+  const aGuardar = existente ? { ...p, id: existente.id } : p;
+  nube.guardarPersonaNube(aGuardar);
+  return aGuardar;
 }
 
 function escapeHtml(texto) {
@@ -86,7 +89,7 @@ export function crearSelectorPersonas(ids, opciones = {}) {
   function renderGuardados() {
     if (!ids.guardadosWrap) return;
     const excluidos = new Set([...seleccionadas.map((p) => p.id), ...excluidosFn()]);
-    const guardadas = storage.getPersonas().filter((g) => !excluidos.has(g.id));
+    const guardadas = nube.obtenerPersonas().filter((g) => !excluidos.has(g.id));
     el(ids.guardadosWrap).hidden = guardadas.length === 0;
     el(ids.guardadosLista).innerHTML = guardadas.map((g) => `
       <span class="chip" data-agregar="${g.id}">${ui.svgFantasma(g.color, 16)}${escapeHtml(g.nombre)}<span class="quitar-chip" data-borrar="${g.id}">✕</span></span>
@@ -105,9 +108,8 @@ export function crearSelectorPersonas(ids, opciones = {}) {
     const nombre = input.value.trim().slice(0, 16);
     if (!nombre) { ui.toast('Escribí un nombre'); return; }
     if (seleccionadas.some((p) => p.nombre.toLowerCase() === nombre.toLowerCase())) { ui.toast('Ese nombre ya está agregado'); return; }
-    const nueva = { id: nuevoId(), nombre, color: colorSeleccionado || COLORES[0].valor };
+    const nueva = guardarPersona({ id: nuevoId(), nombre, color: colorSeleccionado || COLORES[0].valor });
     seleccionadas.push(nueva);
-    guardarPersona(nueva);
     input.value = '';
     colorSeleccionado = null;
     renderTodo();
@@ -151,14 +153,12 @@ export function crearSelectorPersonas(ids, opciones = {}) {
     el(ids.guardadosLista).addEventListener('click', (e) => {
       const btnBorrar = e.target.closest('[data-borrar]');
       if (btnBorrar) {
-        const lista = storage.getPersonas().filter((g) => g.id !== btnBorrar.dataset.borrar);
-        storage.setPersonas(lista);
-        renderGuardados();
+        nube.borrarPersonaNube(btnBorrar.dataset.borrar);
         return;
       }
       const chip = e.target.closest('[data-agregar]');
       if (chip) {
-        const g = storage.getPersonas().find((x) => x.id === chip.dataset.agregar);
+        const g = nube.obtenerPersonas().find((x) => x.id === chip.dataset.agregar);
         if (!g || seleccionadas.some((p) => p.id === g.id)) return;
         const usados = new Set(seleccionadas.map((p) => p.color));
         let color = g.color;
@@ -171,6 +171,8 @@ export function crearSelectorPersonas(ids, opciones = {}) {
       }
     });
   }
+
+  nube.onPersonasCambia(() => renderGuardados());
 
   return {
     reiniciar(iniciales = []) {

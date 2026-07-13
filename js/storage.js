@@ -45,6 +45,10 @@ export const storage = {
   // Configuración global: { pantallaEncendida }
   getConfig: () => leer('config', { pantallaEncendida: false }),
   setConfig: (config) => escribir('config', config),
+
+  // Código del grupo compartido (null si todavía no se creó/unió a ninguno)
+  getCodigoGrupo: () => leer('codigoGrupo', null),
+  setCodigoGrupo: (codigo) => escribir('codigoGrupo', codigo),
 };
 
 export function nuevoId() {

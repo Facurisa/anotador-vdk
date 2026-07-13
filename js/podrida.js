@@ -652,9 +652,9 @@ function agregarJugadorDesdeMenu() {
   const usados = new Set(estado.jugadores.map((j) => j.color));
   const libre = COLORES.find((c) => !usados.has(c.valor));
   const color = libre ? libre.valor : COLORES[estado.jugadores.length % COLORES.length].valor;
-  const nuevo = { id: nuevoId(), nombre, color, activo: true };
+  const guardada = guardarPersona({ id: nuevoId(), nombre, color });
+  const nuevo = { ...guardada, activo: true };
   estado.jugadores.push(nuevo);
-  guardarPersona(nuevo);
   if (estado.fase === 'apuestas') {
     estado.apuestas[nuevo.id] = 0;
     estado.ordenRondaIds.push(nuevo.id);
