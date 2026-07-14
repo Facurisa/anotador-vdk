@@ -207,15 +207,6 @@ h1, h2, h3, p { margin: 0 0 10px; }
   z-index: 2;
 }
 
-/* ============ Foto opcional al terminar una partida ============ */
-.fila-foto-opcional {
-  text-align: center;
-  margin: 4px 0 16px;
-  padding-bottom: 14px;
-  border-bottom: 1px dashed rgba(255,255,255,.15);
-}
-.fila-foto-opcional .btn-link { margin: 0 auto; }
-.estado-foto { font-size: .85rem; opacity: .75; margin: 6px 0 0; }
 .input-tiza {
   width: 100%;
   background: rgba(255,255,255,.05);

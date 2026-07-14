@@ -1,6 +1,6 @@
 import { storage } from './storage.js';
 import * as ui from './ui.js';
-import { agregarAlHistorial, agregarFotoAPartida, compartirImagen } from './historial.js';
+import { agregarAlHistorial, compartirImagen } from './historial.js';
 import { crearSelectorPersonas } from './selector-personas.js';
 
 const UMBRAL_SWIPE = 30; // px para distinguir toque de deslizar
@@ -11,7 +11,6 @@ let undoStack = [];
 let ignorarToques = false; // se pone true justo cuando se gana un chico, hasta "otro chico"
 let selectorTrucoA = null;
 let selectorTrucoB = null;
-let entradaHistorialPendiente = null; // id de la entrada recién guardada, para poder adjuntarle una foto
 
 function estadoInicial(objetivo = 40, practica = false) {
   return {
@@ -180,9 +179,8 @@ function guardarResultadoChico(equipoIdx) {
   eq.chicos += 1;
   persistir();
   renderTrofeos();
-  entradaHistorialPendiente = null;
   if (!estado.practica) {
-    entradaHistorialPendiente = agregarAlHistorial({
+    agregarAlHistorial({
       tipo: 'truco',
       equipoA: estado.equipos[0].nombre,
       equipoB: estado.equipos[1].nombre,
@@ -198,13 +196,10 @@ function guardarResultadoChico(equipoIdx) {
 }
 
 // Solo la parte visual: se llama después del festejo, con el resultado ya
-// guardado hace rato (ver guardarResultadoChico). Ofrece sacarle una foto
-// opcional a la pizarra como respaldo extra del resultado.
+// guardado hace rato (ver guardarResultadoChico).
 function mostrarCartelGanador(equipoIdx) {
   const eq = estado.equipos[equipoIdx];
   document.getElementById('ganador-nombre').textContent = eq.nombre;
-  const idEntrada = entradaHistorialPendiente;
-  ui.prepararFotoOpcional('truco', idEntrada, (archivo) => agregarFotoAPartida(idEntrada, archivo));
   ui.abrirOverlay('overlay-ganador-truco');
 }
 

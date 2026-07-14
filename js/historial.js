@@ -1,15 +1,8 @@
 import * as ui from './ui.js';
 import * as nube from './nube.js';
 
-// Devuelve el id de la entrada ya creada (de una, sin esperar red — ver
-// nube.js) para que quien llama pueda, si quiere, ofrecer agregarle una foto
-// después. El guardado del resultado nunca depende de la foto.
 export function agregarAlHistorial(entrada) {
   return nube.agregarAlHistorialNube(entrada);
-}
-
-export async function agregarFotoAPartida(entradaId, archivo) {
-  await nube.agregarFotoAHistorial(entradaId, archivo);
 }
 
 function statsVacias(p) {
@@ -91,7 +84,7 @@ function renderTabTruco(items) {
     .join('');
   const listaHtml = items.slice(0, 60).map((it) => `
     <div class="item-historial">
-      <div class="fecha-historial">${formatearFecha(it.fecha)}${it.fotoUrl ? ` · <a href="${it.fotoUrl}" target="_blank" rel="noopener">📷 foto</a>` : ''}</div>
+      <div class="fecha-historial">${formatearFecha(it.fecha)}</div>
       <div class="resultado-historial">${escapeHtml(it.equipoA)} ${it.puntosA} — ${it.puntosB} ${escapeHtml(it.equipoB)}<br><strong>Ganó ${escapeHtml(it.ganador)}</strong></div>
     </div>`).join('');
   cont.innerHTML = `<p class="stats-titulo etiqueta-tiza">Chicos ganados</p>${statsHtml}<p class="stats-titulo etiqueta-tiza">Últimos chicos</p>${listaHtml}`;
@@ -126,7 +119,7 @@ function renderTabPodrida(items) {
     const orden = [...it.jugadores].sort((a, b) => b.puntaje - a.puntaje);
     const resumen = orden.map((j) => `${escapeHtml(j.nombre)} ${j.puntaje}`).join(' · ');
     return `<div class="item-historial">
-      <div class="fecha-historial">${formatearFecha(it.fecha)}${it.fotoUrl ? ` · <a href="${it.fotoUrl}" target="_blank" rel="noopener">📷 foto</a>` : ''}</div>
+      <div class="fecha-historial">${formatearFecha(it.fecha)}</div>
       <div class="resultado-historial">${resumen}<br><strong>Ganó ${escapeHtml(it.ganador)}</strong></div>
     </div>`;
   }).join('');

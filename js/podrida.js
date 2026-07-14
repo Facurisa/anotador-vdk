@@ -1,12 +1,11 @@
 import { storage, nuevoId } from './storage.js';
 import * as ui from './ui.js';
-import { agregarAlHistorial, agregarFotoAPartida, compartirImagen } from './historial.js';
+import { agregarAlHistorial, compartirImagen } from './historial.js';
 import { crearSelectorPersonas, guardarPersona, COLORES } from './selector-personas.js';
 
 let estado = null;
 let edicionTemporal = null;
 let selectorPodrida = null;
-let entradaHistorialPendiente = null; // id de la entrada recién guardada, para poder adjuntarle una foto
 
 // Estado transitorio de la pantalla de configuración (antes de empezar la partida)
 let configMaxCartas = 7;
@@ -472,9 +471,8 @@ function guardarResultadoPodrida() {
   });
   const ordenados = [...statsJugadores].sort((a, b) => b.puntaje - a.puntaje);
 
-  entradaHistorialPendiente = null;
   if (!estado.practica) {
-    entradaHistorialPendiente = agregarAlHistorial({
+    agregarAlHistorial({
       tipo: 'podrida',
       jugadores: statsJugadores,
       ganador: ordenados[0].nombre,
@@ -484,12 +482,9 @@ function guardarResultadoPodrida() {
 }
 
 // Solo la parte visual: podio, tabla y overlay. Se llama después de que el
-// resultado ya está guardado (ver guardarResultadoPodrida). Ofrece sacarle
-// una foto opcional a la pizarra como respaldo extra del resultado.
+// resultado ya está guardado (ver guardarResultadoPodrida).
 function mostrarPodio(ordenados) {
   renderPodio(ordenados);
-  const idEntrada = entradaHistorialPendiente;
-  ui.prepararFotoOpcional('podrida', idEntrada, (archivo) => agregarFotoAPartida(idEntrada, archivo));
   ui.abrirOverlay('overlay-fin-podrida');
 }
 

@@ -5,12 +5,9 @@ import {
   initializeApp,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
-  initializeFirestore, persistentLocalCache, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
+  initializeFirestore, persistentLocalCache, collection, doc, addDoc, setDoc, deleteDoc,
   onSnapshot, query, orderBy, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import {
-  getStorage, ref as refStorage, uploadBytes, getDownloadURL,
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 import { storage } from './storage.js';
 
 const firebaseConfig = {
@@ -27,11 +24,6 @@ const app = initializeApp(firebaseConfig);
 // sin internet, subiéndolos solos apenas vuelve la señal (offline-first nativo
 // del SDK, no hay que armar nada a mano para esto).
 const db = initializeFirestore(app, { localCache: persistentLocalCache() });
-const bucket = getStorage(app);
-// La foto es opcional: si falla (sin señal, Storage caído, etc.) tiene que
-// avisar rápido, no quedarse "Subiendo…" colgado — el SDK por defecto
-// reintenta solo hasta 2 minutos antes de rendirse.
-bucket.maxUploadRetryTime = 10000;
 
 let quitarListenerHistorial = null;
 let quitarListenerPersonas = null;
@@ -124,20 +116,6 @@ export function agregarAlHistorialNube(entrada) {
   const ref = doc(refHistorial(codigo));
   setDoc(ref, { ...resto, fecha: serverTimestamp() });
   return ref.id;
-}
-
-// Foto opcional de respaldo, agregada DESPUÉS de que el resultado ya quedó
-// guardado (nunca antes: sacar la foto no debe poder demorar ni bloquear el
-// guardado del resultado en sí). Si falla (sin señal, por ejemplo) no rompe
-// nada más — es un agregado, no un requisito.
-export async function agregarFotoAHistorial(entradaId, archivo) {
-  const codigo = grupoActivo();
-  if (!codigo || !entradaId || !archivo) return;
-  const ruta = `grupos/${codigo}/historial/${entradaId}.jpg`;
-  const referencia = refStorage(bucket, ruta);
-  await uploadBytes(referencia, archivo, { contentType: archivo.type || 'image/jpeg' });
-  const url = await getDownloadURL(referencia);
-  await updateDoc(doc(db, 'grupos', codigo, 'historial', entradaId), { fotoUrl: url });
 }
 
 export async function guardarPersonaNube(persona) {

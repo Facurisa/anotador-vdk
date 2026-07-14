@@ -46,39 +46,6 @@ export function toast(mensaje, duracion = 2200) {
   }, duracion);
 }
 
-// Wire genérico para el botón "Sacar foto (opcional)" que aparece al terminar
-// una partida. La foto es siempre un agregado posterior al resultado, nunca
-// un paso que lo bloquee — si no hay entradaId (no se guardó, ej. partido
-// amistoso) directamente se oculta toda la fila. Espera en el DOM, por cada
-// prefijo, los elementos `${prefijo}-fila-foto` (contenedor), `${prefijo}-btn-foto`,
-// `${prefijo}-input-foto` (file input oculto) y `${prefijo}-estado-foto` (texto de estado).
-export function prepararFotoOpcional(prefijo, entradaId, subir) {
-  const contenedor = document.getElementById(`${prefijo}-fila-foto`);
-  if (!contenedor) return;
-  if (!entradaId) { contenedor.hidden = true; return; }
-  contenedor.hidden = false;
-  const boton = document.getElementById(`${prefijo}-btn-foto`);
-  const input = document.getElementById(`${prefijo}-input-foto`);
-  const estadoEl = document.getElementById(`${prefijo}-estado-foto`);
-  boton.hidden = false;
-  estadoEl.textContent = '';
-  input.value = '';
-  boton.onclick = () => input.click();
-  input.onchange = async () => {
-    const archivo = input.files[0];
-    if (!archivo) return;
-    boton.hidden = true;
-    estadoEl.textContent = 'Subiendo foto…';
-    try {
-      await subir(archivo);
-      estadoEl.textContent = '📷 ¡Foto guardada!';
-    } catch (e) {
-      estadoEl.textContent = 'No se pudo subir (¿sin señal?). El resultado ya está guardado igual.';
-      boton.hidden = false;
-    }
-  };
-}
-
 export function confirmar(mensaje) {
   return new Promise((resolve) => {
     document.getElementById('confirmar-texto').textContent = mensaje;
