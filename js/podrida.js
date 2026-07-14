@@ -1,5 +1,6 @@
 import { storage, nuevoId } from './storage.js';
 import * as ui from './ui.js';
+import * as nube from './nube.js';
 import { agregarAlHistorial, compartirImagen } from './historial.js';
 import { crearSelectorPersonas, guardarPersona, COLORES } from './selector-personas.js';
 
@@ -646,6 +647,27 @@ function renderMenuJugadores() {
   cont.querySelectorAll('[data-quitar-jugador]').forEach((btn) => {
     btn.addEventListener('click', () => quitarJugador(btn.dataset.quitarJugador));
   });
+  renderGuardadosMenu();
+}
+
+// Fichas de personas ya guardadas (de otras partidas/dispositivos) que no
+// están ya en esta partida, para sumarlas directo sin tener que escribir el
+// nombre a mano — mismo problema que la config resolvía con "guardados", pero
+// acá faltaba para el agregado a mitad de partida.
+function renderGuardadosMenu() {
+  const cont = document.getElementById('menu-podrida-guardados');
+  if (!cont) return;
+  const yaEnPartida = new Set(estado.jugadores.map((j) => j.id));
+  const disponibles = nube.obtenerPersonas().filter((p) => !yaEnPartida.has(p.id));
+  if (!disponibles.length) { cont.innerHTML = ''; return; }
+  cont.innerHTML = `
+    <p class="etiqueta-tiza chica">O elegí de los guardados</p>
+    <div class="lista-chips">${disponibles.map((p) => `
+      <span class="chip" data-agregar-guardado="${p.id}">${iconoJugador(p.color, 16)}${escapeHtml(p.nombre)}</span>
+    `).join('')}</div>`;
+  cont.querySelectorAll('[data-agregar-guardado]').forEach((chip) => {
+    chip.addEventListener('click', () => agregarJugadorGuardadoAlMenu(chip.dataset.agregarGuardado));
+  });
 }
 
 async function quitarJugador(id) {
@@ -668,15 +690,11 @@ async function quitarJugador(id) {
   if (estado.fase === 'apuestas') renderFaseApuestas(); else renderFaseResultado();
 }
 
-function agregarJugadorDesdeMenu() {
-  const input = document.getElementById('menu-podrida-nuevo-nombre');
-  const nombre = input.value.trim().slice(0, 16);
-  if (!nombre) return;
-  const usados = new Set(estado.jugadores.map((j) => j.color));
-  const libre = COLORES.find((c) => !usados.has(c.valor));
-  const color = libre ? libre.valor : COLORES[estado.jugadores.length % COLORES.length].valor;
-  const guardada = guardarPersona({ id: nuevoId(), nombre, color });
-  const nuevo = { ...guardada, activo: true };
+// Agrega a alguien (nuevo o ya guardado, resuelto por quien llama) a una
+// partida en curso, con toda la lógica común: empate con el último, sumarlo
+// a la ronda de apuestas si ya está en curso, repartidor, etc.
+function agregarJugadorALaPartida(persona) {
+  const nuevo = { ...persona, activo: true };
   estado.jugadores.push(nuevo);
 
   // Se suma a mitad de partida: en vez de arrancar en 0 (quedando en desventaja
@@ -686,7 +704,7 @@ function agregarJugadorDesdeMenu() {
     const minimo = Math.min(...activosPrevios.map((j) => puntajeDe(j)));
     if (!estado.ajustes) estado.ajustes = {};
     estado.ajustes[nuevo.id] = minimo;
-    ui.toast(`${nombre} arranca con ${minimo} puntos, empatado con el último`);
+    ui.toast(`${nuevo.nombre} arranca con ${minimo} puntos, empatado con el último`);
   }
 
   if (estado.fase === 'apuestas') {
@@ -696,10 +714,39 @@ function agregarJugadorDesdeMenu() {
   }
   if (!estado.repartidorId && estado.repartidorActivo) estado.repartidorId = nuevo.id;
   persistir();
-  input.value = '';
   renderMenuJugadores();
   renderTabla();
   if (estado.fase === 'apuestas') renderFaseApuestas();
+}
+
+function agregarJugadorDesdeMenu() {
+  const input = document.getElementById('menu-podrida-nuevo-nombre');
+  const nombre = input.value.trim().slice(0, 16);
+  if (!nombre) return;
+  if (estado.jugadores.some((j) => j.nombre.toLowerCase() === nombre.toLowerCase())) {
+    ui.toast('Ya hay alguien con ese nombre en esta partida');
+    return;
+  }
+  const usados = new Set(estado.jugadores.map((j) => j.color));
+  const libre = COLORES.find((c) => !usados.has(c.valor));
+  const color = libre ? libre.valor : COLORES[estado.jugadores.length % COLORES.length].valor;
+  const guardada = guardarPersona({ id: nuevoId(), nombre, color });
+  input.value = '';
+  agregarJugadorALaPartida(guardada);
+}
+
+// Agregar directo a alguien que ya estaba guardado (de otra partida o de otro
+// dispositivo del grupo), sin tener que volver a escribir el nombre.
+function agregarJugadorGuardadoAlMenu(id) {
+  const persona = nube.obtenerPersonas().find((p) => p.id === id);
+  if (!persona) return;
+  const usados = new Set(estado.jugadores.map((j) => j.color));
+  let color = persona.color;
+  if (usados.has(color)) {
+    const libre = COLORES.find((c) => !usados.has(c.valor));
+    color = libre ? libre.valor : COLORES[estado.jugadores.length % COLORES.length].valor;
+  }
+  agregarJugadorALaPartida({ id: persona.id, nombre: persona.nombre, color });
 }
 
 async function reiniciarPartidaPodrida() {
@@ -738,6 +785,7 @@ function abrirMenu() {
       <input class="input-tiza" type="text" id="menu-podrida-nuevo-nombre" maxlength="16" placeholder="Agregar jugador">
       <button class="btn btn-tiza" id="menu-podrida-agregar">Agregar</button>
     </div>
+    <div id="menu-podrida-guardados"></div>
 
     <div class="menu-seccion-titulo">Configuración</div>
     <div class="fila-toggle">
