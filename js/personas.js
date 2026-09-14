@@ -91,13 +91,19 @@ function formatoDiferencia(n) {
   return String(n); // el signo "-" ya viene incluido en el número negativo
 }
 
+function filaPapaDe(p, papaDe) {
+  if (!papaDe) return '';
+  return `<div class="stat-persona-fila fila-papa-de"><span>👑 ${escapeHtml(p.nombre)} pap&aacute; de ${escapeHtml(papaDe.nombre)}</span><span>${papaDe.veces} veces</span></div>`;
+}
+
 function renderTabTruco(personas) {
   const cont = document.getElementById('personas-lista-truco');
   const ordenadas = [...personas].sort((a, b) => (b.trucoGanados - a.trucoGanados) || (b.trucoDiferencia - a.trucoDiferencia));
   cont.innerHTML = ordenadas.map((p) => {
     const filas = p.trucoJugados
       ? `<div class="stat-persona-fila"><span class="etiqueta-stat">Ganados</span><span>${p.trucoGanados} de ${p.trucoJugados}</span></div>
-         <div class="stat-persona-fila"><span class="etiqueta-stat">Diferencia</span><span class="${p.trucoDiferencia > 0 ? 'diferencia-positiva' : p.trucoDiferencia < 0 ? 'diferencia-negativa' : ''}">${formatoDiferencia(p.trucoDiferencia)}</span></div>`
+         <div class="stat-persona-fila"><span class="etiqueta-stat">Diferencia</span><span class="${p.trucoDiferencia > 0 ? 'diferencia-positiva' : p.trucoDiferencia < 0 ? 'diferencia-negativa' : ''}">${formatoDiferencia(p.trucoDiferencia)}</span></div>
+         ${filaPapaDe(p, p.trucoPapaDe)}`
       : `<div class="stat-persona-fila"><span style="opacity:.5">Todavía no jugó al truco</span></div>`;
     return tarjetaPersona(p, filas);
   }).join('');
@@ -110,7 +116,8 @@ function renderTabPodrida(personas) {
     const filas = p.podridaJugadas
       ? `<div class="stat-persona-fila"><span class="etiqueta-stat">Ganadas</span><span>${p.podridaGanadas} de ${p.podridaJugadas}</span></div>
          <div class="stat-persona-fila"><span class="etiqueta-stat">Acierto</span><span>${p.podridaTotales ? Math.round((p.podridaCumplidas / p.podridaTotales) * 100) : 0}% de apuestas</span></div>
-         <div class="stat-persona-fila"><span class="etiqueta-stat">Promedio</span><span>${Math.round(p.podridaSumaPuntaje / p.podridaJugadas)} puntos</span></div>`
+         <div class="stat-persona-fila"><span class="etiqueta-stat">Promedio</span><span>${Math.round(p.podridaSumaPuntaje / p.podridaJugadas)} puntos</span></div>
+         ${filaPapaDe(p, p.podridaPapaDe)}`
       : `<div class="stat-persona-fila"><span style="opacity:.5">Todavía no jugó a la podrida</span></div>`;
     return tarjetaPersona(p, filas);
   }).join('');

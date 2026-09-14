@@ -11,7 +11,28 @@ function statsVacias(p) {
     trucoJugados: 0, trucoGanados: 0, trucoDiferencia: 0,
     podridaJugadas: 0, podridaGanadas: 0,
     podridaSumaPuntaje: 0, podridaCumplidas: 0, podridaTotales: 0,
+    trucoPapaDe: null, podridaPapaDe: null,
   };
+}
+
+// Suma una victoria de "idGanador" sobre "idPerdedor" en el mapa de
+// enfrentamientos de un juego: { idGanador: { idPerdedor: {nombre, veces} } }.
+function sumarVictoriaContra(mapaContra, idGanador, idPerdedor, nombrePerdedor) {
+  if (!idGanador || !idPerdedor || idGanador === idPerdedor) return;
+  if (!mapaContra[idGanador]) mapaContra[idGanador] = {};
+  const fila = mapaContra[idGanador];
+  if (!fila[idPerdedor]) fila[idPerdedor] = { nombre: nombrePerdedor, veces: 0 };
+  fila[idPerdedor].veces += 1;
+}
+
+// De todos los rivales a los que le ganó "id", devuelve el que más veces le
+// ganó (para el cartel "Fulano papá de Mengano"). null si nunca le ganó a nadie.
+function rivalMasVeces(mapaContra, id) {
+  const fila = mapaContra[id];
+  if (!fila) return null;
+  let mejor = null;
+  Object.values(fila).forEach((r) => { if (!mejor || r.veces > mejor.veces) mejor = r; });
+  return mejor;
 }
 
 // Combina las personas guardadas con lo que surge del historial de truco y
@@ -22,21 +43,30 @@ export function calcularStatsPersonas() {
   nube.obtenerPersonas().forEach((p) => { mapa[p.id] = statsVacias(p); });
   const obtener = (p) => { if (!mapa[p.id]) mapa[p.id] = statsVacias(p); return mapa[p.id]; };
 
+  // Enfrentamientos directo por juego, para saber a quién le gana más cada uno.
+  const contraTruco = {};
+  const contraPodrida = {};
+
   nube.obtenerHistorial().forEach((it) => {
     if (it.tipo === 'truco') {
       const diferenciaA = it.puntosA - it.puntosB;
-      (it.personasA || []).forEach((p) => {
+      const personasA = it.personasA || [];
+      const personasB = it.personasB || [];
+      personasA.forEach((p) => {
         const s = obtener(p);
         s.trucoJugados += 1;
         s.trucoDiferencia += diferenciaA;
         if (it.equipoGanadorIdx === 0) s.trucoGanados += 1;
       });
-      (it.personasB || []).forEach((p) => {
+      personasB.forEach((p) => {
         const s = obtener(p);
         s.trucoJugados += 1;
         s.trucoDiferencia -= diferenciaA;
         if (it.equipoGanadorIdx === 1) s.trucoGanados += 1;
       });
+      const ganadores = it.equipoGanadorIdx === 0 ? personasA : it.equipoGanadorIdx === 1 ? personasB : [];
+      const perdedores = it.equipoGanadorIdx === 0 ? personasB : it.equipoGanadorIdx === 1 ? personasA : [];
+      ganadores.forEach((g) => perdedores.forEach((pe) => sumarVictoriaContra(contraTruco, g.id, pe.id, pe.nombre)));
     } else if (it.tipo === 'podrida') {
       (it.jugadores || []).forEach((j) => {
         const s = obtener(j);
@@ -46,7 +76,16 @@ export function calcularStatsPersonas() {
         s.podridaCumplidas += j.apuestasCumplidas;
         s.podridaTotales += j.apuestasTotales;
       });
+      const ganador = (it.jugadores || []).find((j) => j.nombre === it.ganador);
+      if (ganador) {
+        (it.jugadores || []).forEach((j) => sumarVictoriaContra(contraPodrida, ganador.id, j.id, j.nombre));
+      }
     }
+  });
+
+  Object.values(mapa).forEach((s) => {
+    s.trucoPapaDe = rivalMasVeces(contraTruco, s.id);
+    s.podridaPapaDe = rivalMasVeces(contraPodrida, s.id);
   });
 
   return Object.values(mapa);

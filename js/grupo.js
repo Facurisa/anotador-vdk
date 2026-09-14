@@ -98,6 +98,16 @@ function unirseGrupo() {
   ui.toast('¡Listo! Fijate si tu nombre ya está en la lista, o agregalo/editalo');
 }
 
+async function salirGrupo() {
+  const ok = await ui.confirmar('¿Salir de este grupo? Vas a dejar de ver su historial y sus personas acá, y vas a poder unirte a otro grupo o crear uno nuevo.');
+  if (!ok) return;
+  nube.detenerListeners();
+  storage.setCodigoGrupo(null);
+  const inputCodigo = document.getElementById('grupo-codigo-input');
+  if (inputCodigo) inputCodigo.value = '';
+  ui.mostrarPantalla('pantalla-grupo');
+}
+
 function copiarCodigo() {
   const codigo = storage.getCodigoGrupo();
   if (!codigo) return;
@@ -145,4 +155,5 @@ export const acciones = {
   'copiar-codigo-grupo': copiarCodigo,
   'continuar-grupo-creado': continuarLuegoDeCrear,
   'grupo-agregar-persona': agregarPersonaGrupo,
+  'salir-grupo': salirGrupo,
 };

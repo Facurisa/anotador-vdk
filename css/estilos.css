@@ -693,6 +693,7 @@ h1, h2, h3, p { margin: 0 0 10px; }
 .etiqueta-stat { opacity: .6; min-width: 60px; }
 .diferencia-positiva { color: #9be89b; }
 .diferencia-negativa { color: #ff9d9d; }
+.fila-papa-de { color: #ffd873; border-top: 1px dashed rgba(255,216,115,.35); margin-top: 4px; padding-top: 8px; }
 
 /* ============ Candado ============ */
 .overlay-candado {

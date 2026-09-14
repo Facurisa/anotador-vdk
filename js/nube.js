@@ -82,6 +82,18 @@ export function iniciarListeners() {
 // Los callbacks se llaman cada vez que cambian los datos (localmente al toque,
 // o cuando llega algo nuevo de otro dispositivo). Si ya hay datos en caché al
 // suscribirse, se llama una vez enseguida con lo que haya.
+// Corta los listeners en tiempo real y vacía la caché en memoria. Se usa al
+// salir de un grupo para dejar de escuchar sus datos antes de unirse a otro
+// (si no, quedarían mezclados los callbacks del grupo viejo con los del nuevo).
+export function detenerListeners() {
+  if (quitarListenerHistorial) { quitarListenerHistorial(); quitarListenerHistorial = null; }
+  if (quitarListenerPersonas) { quitarListenerPersonas(); quitarListenerPersonas = null; }
+  cacheHistorial = [];
+  cachePersonas = [];
+  callbacksHistorial.forEach((cb) => cb(cacheHistorial));
+  callbacksPersonas.forEach((cb) => cb(cachePersonas));
+}
+
 export function onHistorialCambia(cb) {
   callbacksHistorial.push(cb);
   cb(cacheHistorial);
