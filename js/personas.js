@@ -93,7 +93,11 @@ function formatoDiferencia(n) {
 
 function filaPapaDe(p, papaDe) {
   if (!papaDe) return '';
-  return `<div class="stat-persona-fila fila-papa-de"><span>👑 ${escapeHtml(p.nombre)} pap&aacute; de ${escapeHtml(papaDe.nombre)}</span><span>${papaDe.veces} veces</span></div>`;
+  const veces = `${papaDe.veces} ${papaDe.veces === 1 ? 'vez' : 'veces'}`;
+  if (papaDe.papa) {
+    return `<div class="stat-persona-fila fila-papa-de"><span>👑 ${escapeHtml(p.nombre)} pap&aacute; de ${escapeHtml(papaDe.nombre)}</span><span>${veces}</span></div>`;
+  }
+  return `<div class="stat-persona-fila"><span class="etiqueta-stat">M&aacute;s le gan&oacute; a</span><span>${escapeHtml(papaDe.nombre)} &middot; ${veces}</span></div>`;
 }
 
 function renderTabTruco(personas) {

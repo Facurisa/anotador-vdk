@@ -25,14 +25,23 @@ function sumarVictoriaContra(mapaContra, idGanador, idPerdedor, nombrePerdedor) 
   fila[idPerdedor].veces += 1;
 }
 
-// De todos los rivales a los que le ganó "id", devuelve el que más veces le
-// ganó (para el cartel "Fulano papá de Mengano"). null si nunca le ganó a nadie.
+// Devuelve { nombre, veces, papa }. "papa" es true cuando "id" le ganó a ese
+// rival más veces de las que perdió contra él (el empate no alcanza): ese es el
+// que se muestra como "Fulano papá de Mengano" (el de más victorias entre los
+// que cumplen). Si no es papá de nadie, se devuelve igual a quien más veces le
+// ganó (papa: false), aunque sean pocas. null si nunca le ganó a nadie.
 function rivalMasVeces(mapaContra, id) {
   const fila = mapaContra[id];
   if (!fila) return null;
-  let mejor = null;
-  Object.values(fila).forEach((r) => { if (!mejor || r.veces > mejor.veces) mejor = r; });
-  return mejor;
+  let masGanado = null;
+  let papaDe = null;
+  Object.entries(fila).forEach(([idRival, r]) => {
+    const derrotas = (mapaContra[idRival] && mapaContra[idRival][id] ? mapaContra[idRival][id].veces : 0);
+    if (!masGanado || r.veces > masGanado.veces) masGanado = r;
+    if (r.veces > derrotas && (!papaDe || r.veces > papaDe.veces)) papaDe = r;
+  });
+  if (papaDe) return { nombre: papaDe.nombre, veces: papaDe.veces, papa: true };
+  return masGanado ? { nombre: masGanado.nombre, veces: masGanado.veces, papa: false } : null;
 }
 
 // Combina las personas guardadas con lo que surge del historial de truco y
