@@ -5,6 +5,7 @@ import { crearSelectorPersonas } from './selector-personas.js';
 
 const UMBRAL_SWIPE = 30; // px para distinguir toque de deslizar
 const DURACION_FESTEJO = 10000; // ms que dura el festejo (champán/mamadera) antes de abrir el cartel de ganador
+const DURACION_FOTO_PATS = 30000; // ms que queda la foto de Pats cuando pierde (se cierra antes tocándola)
 
 let estado = null;
 let undoStack = [];
@@ -139,8 +140,22 @@ function aplicarDelta(equipoIdx, delta) {
     // y no debe poder demorar ni bloquear el guardado real.
     guardarResultadoChico(equipoIdx);
     celebrarFinDeChico(equipoIdx);
+    mostrarFotoPatsSiPerdio(equipoIdx === 0 ? 1 : 0);
     setTimeout(() => mostrarCartelGanador(equipoIdx), DURACION_FESTEJO);
   }
+}
+
+// Chiste del grupo: si Pats está en el equipo que perdió el chico, aparece su
+// foto a pantalla completa (por encima del festejo y del cartel de ganador).
+// Solo es visual: no toca el guardado. Se detecta por el nombre, sin importar
+// mayúsculas ni emojis ("Pats", "Pats🦆", etc.).
+let timerFotoPats = null;
+function mostrarFotoPatsSiPerdio(perdedorIdx) {
+  const personas = estado.equipos[perdedorIdx].personas || [];
+  if (!personas.some((p) => String(p.nombre).toLowerCase().includes('pats'))) return;
+  ui.abrirOverlay('overlay-pats');
+  clearTimeout(timerFotoPats);
+  timerFotoPats = setTimeout(() => ui.cerrarOverlay('overlay-pats'), DURACION_FOTO_PATS);
 }
 
 // Festejo antes de abrir el cartel de "¡Ganó...!": champán del lado ganador,

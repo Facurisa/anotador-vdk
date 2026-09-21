@@ -500,6 +500,10 @@ h1, h2, h3, p { margin: 0 0 10px; }
 .overlay-contenido p { text-align: center; font-size: 1.1rem; }
 .overlay-scroll { text-align: left; }
 
+/* Foto de Pats a pantalla completa cuando pierde un chico: queda por encima del cartel de ganador. */
+.overlay-pats { z-index: 60; padding: 0; background: rgba(0,0,0,.94); }
+.overlay-pats img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
 .texto-ganador {
   font-size: 1.6rem;
   text-align: center;
