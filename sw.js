@@ -1,6 +1,6 @@
 // Service worker: cachea todo lo necesario para que la app funcione sin internet.
 // Si cambiás archivos de la app, subí el número de VERSION para que los celulares bajen la versión nueva.
-const VERSION = 'anotador-v27';
+const VERSION = 'anotador-v28';
 
 const ARCHIVOS = [
   './',
@@ -32,7 +32,9 @@ const ARCHIVOS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(VERSION).then((cache) => Promise.allSettled(
-      ARCHIVOS.map((archivo) => cache.add(archivo).catch((err) => console.warn('No se pudo cachear', archivo, err)))
+      // cache: 'reload' saltea la caché HTTP del navegador (GitHub Pages permite
+      // guardar archivos 10 min): evita que la versión nueva se quede con copias viejas.
+      ARCHIVOS.map((archivo) => cache.add(new Request(archivo, { cache: 'reload' })).catch((err) => console.warn('No se pudo cachear', archivo, err)))
     )).then(() => self.skipWaiting())
   );
 });

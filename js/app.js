@@ -89,7 +89,20 @@ async function aplicarConfigInicial() {
   }
 }
 
+// Muestra la versión que está cacheando el service worker (ej. "anotador-v28"),
+// para poder confirmar qué versión corre en un celular.
+function mostrarVersion(reintento = false) {
+  const el = document.getElementById('version-app');
+  if (!el || !('caches' in window)) return;
+  caches.keys().then((claves) => {
+    const version = claves.filter((c) => c.startsWith('anotador-')).sort().pop();
+    if (version) el.textContent = version;
+    else if (!reintento) setTimeout(() => mostrarVersion(true), 3000);
+  }).catch(() => {});
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  mostrarVersion();
   grupo.iniciarSiYaHayGrupo();
   if (grupo.tieneGrupo()) ui.mostrarPantalla('pantalla-inicio');
 

@@ -159,6 +159,11 @@ let timerFotoPats = null;
 function mostrarFotoPatsSiPerdio(perdedorIdx) {
   const personas = estado.equipos[perdedorIdx].personas || [];
   if (!personas.some((p) => String(p.nombre).toLowerCase().includes('pats'))) return;
+  const overlay = document.getElementById('overlay-pats');
+  // Durante el primer instante no recibe toques: el "click" que genera el
+  // navegador tras el último toque de puntaje no debe cerrarla al toque.
+  overlay.style.pointerEvents = 'none';
+  setTimeout(() => { overlay.style.pointerEvents = ''; }, 800);
   ui.abrirOverlay('overlay-pats');
   clearTimeout(timerFotoPats);
   timerFotoPats = setTimeout(() => ui.cerrarOverlay('overlay-pats'), DURACION_FOTO_PATS);
