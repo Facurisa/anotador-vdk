@@ -138,7 +138,13 @@ function aplicarDelta(equipoIdx, delta) {
     // si alguien cierra la app en ese momento (por ejemplo porque perdió), el
     // chico ya tiene que haber quedado guardado. El festejo es solo estético
     // y no debe poder demorar ni bloquear el guardado real.
-    guardarResultadoChico(equipoIdx);
+    try {
+      guardarResultadoChico(equipoIdx);
+    } catch (err) {
+      // Si guardar falla, el festejo y la foto igual tienen que salir.
+      console.error('No se pudo guardar el chico en el historial', err);
+      ui.toast(`No se pudo guardar el resultado (${err && (err.code || err.message) || 'error'})`, 6000);
+    }
     celebrarFinDeChico(equipoIdx);
     mostrarFotoPatsSiPerdio(equipoIdx === 0 ? 1 : 0);
     setTimeout(() => mostrarCartelGanador(equipoIdx), DURACION_FESTEJO);
