@@ -91,6 +91,10 @@ function formatoDiferencia(n) {
   return String(n); // el signo "-" ya viene incluido en el número negativo
 }
 
+function porcentajeVictorias(ganadas, jugadas) {
+  return `${Math.round((ganadas / jugadas) * 100)}%`;
+}
+
 // Dos filas independientes: "papá de" (mayor diferencia victorias − derrotas
 // contra un rival) y "Más le ganó a" (el rival al que más veces le ganó, sea o
 // no del que es papá).
@@ -111,7 +115,7 @@ function renderTabTruco(personas) {
   const ordenadas = [...personas].sort((a, b) => (b.trucoGanados - a.trucoGanados) || (b.trucoDiferencia - a.trucoDiferencia));
   cont.innerHTML = ordenadas.map((p) => {
     const filas = p.trucoJugados
-      ? `<div class="stat-persona-fila"><span class="etiqueta-stat">Ganados</span><span>${p.trucoGanados} de ${p.trucoJugados}</span></div>
+      ? `<div class="stat-persona-fila"><span class="etiqueta-stat">Ganados</span><span>${p.trucoGanados} de ${p.trucoJugados} &middot; ${porcentajeVictorias(p.trucoGanados, p.trucoJugados)}</span></div>
          <div class="stat-persona-fila"><span class="etiqueta-stat">Diferencia</span><span class="${p.trucoDiferencia > 0 ? 'diferencia-positiva' : p.trucoDiferencia < 0 ? 'diferencia-negativa' : ''}">${formatoDiferencia(p.trucoDiferencia)}</span></div>
          ${filasRivales(p, p.trucoPapaDe, p.trucoMasGanado)}`
       : `<div class="stat-persona-fila"><span style="opacity:.5">Todavía no jugó al truco</span></div>`;
@@ -124,7 +128,7 @@ function renderTabPodrida(personas) {
   const ordenadas = [...personas].sort((a, b) => b.podridaGanadas - a.podridaGanadas);
   cont.innerHTML = ordenadas.map((p) => {
     const filas = p.podridaJugadas
-      ? `<div class="stat-persona-fila"><span class="etiqueta-stat">Ganadas</span><span>${p.podridaGanadas} de ${p.podridaJugadas}</span></div>
+      ? `<div class="stat-persona-fila"><span class="etiqueta-stat">Ganadas</span><span>${p.podridaGanadas} de ${p.podridaJugadas} &middot; ${porcentajeVictorias(p.podridaGanadas, p.podridaJugadas)}</span></div>
          <div class="stat-persona-fila"><span class="etiqueta-stat">Acierto</span><span>${p.podridaTotales ? Math.round((p.podridaCumplidas / p.podridaTotales) * 100) : 0}% de apuestas</span></div>
          <div class="stat-persona-fila"><span class="etiqueta-stat">Promedio</span><span>${Math.round(p.podridaSumaPuntaje / p.podridaJugadas)} puntos</span></div>
          ${filasRivales(p, p.podridaPapaDe, p.podridaMasGanado)}`
