@@ -11,7 +11,7 @@ function statsVacias(p) {
     trucoJugados: 0, trucoGanados: 0, trucoDiferencia: 0,
     podridaJugadas: 0, podridaGanadas: 0,
     podridaSumaPuntaje: 0, podridaCumplidas: 0, podridaTotales: 0,
-    trucoPapaDe: null, podridaPapaDe: null,
+    trucoPapaDe: null, trucoMasGanado: null, podridaPapaDe: null, podridaMasGanado: null,
   };
 }
 
@@ -25,23 +25,28 @@ function sumarVictoriaContra(mapaContra, idGanador, idPerdedor, nombrePerdedor) 
   fila[idPerdedor].veces += 1;
 }
 
-// Devuelve { nombre, veces, papa }. "papa" es true cuando "id" le ganó a ese
-// rival más veces de las que perdió contra él (el empate no alcanza): ese es el
-// que se muestra como "Fulano papá de Mengano" (el de más victorias entre los
-// que cumplen). Si no es papá de nadie, se devuelve igual a quien más veces le
-// ganó (papa: false), aunque sean pocas. null si nunca le ganó a nadie.
-function rivalMasVeces(mapaContra, id) {
+// Diferencia (victorias − derrotas) que hay que superar contra un rival para
+// ser "papá" de él: tiene que ser MÁS de +3 (o sea, +4 o más).
+const DIFERENCIA_PARA_SER_PAPA = 3;
+
+// Devuelve { papaDe, masGanado } para "id" (cada uno puede ser null):
+// - papaDe: el rival con la mayor diferencia (victorias − derrotas) de "id"
+//   contra él, comparada con la de todos sus otros rivales. Tiene que superar
+//   DIFERENCIA_PARA_SER_PAPA (si no, no es papá de nadie). Si dos rivales
+//   empatan en diferencia, gana el de más victorias.
+// - masGanado: el rival al que más veces le ganó, sin importar las derrotas
+//   (ni quién es papá de quién). Si empatan, el de mayor diferencia.
+function rivalesDe(mapaContra, id) {
   const fila = mapaContra[id];
-  if (!fila) return null;
-  let masGanado = null;
   let papaDe = null;
-  Object.entries(fila).forEach(([idRival, r]) => {
-    const derrotas = (mapaContra[idRival] && mapaContra[idRival][id] ? mapaContra[idRival][id].veces : 0);
-    if (!masGanado || r.veces > masGanado.veces) masGanado = r;
-    if (r.veces > derrotas && (!papaDe || r.veces > papaDe.veces)) papaDe = r;
+  let masGanado = null;
+  Object.entries(fila || {}).forEach(([idRival, r]) => {
+    const derrotas = (mapaContra[idRival] && mapaContra[idRival][id]) ? mapaContra[idRival][id].veces : 0;
+    const rival = { nombre: r.nombre, victorias: r.veces, derrotas, neto: r.veces - derrotas };
+    if (rival.neto > DIFERENCIA_PARA_SER_PAPA && (!papaDe || rival.neto > papaDe.neto || (rival.neto === papaDe.neto && rival.victorias > papaDe.victorias))) papaDe = rival;
+    if (!masGanado || rival.victorias > masGanado.victorias || (rival.victorias === masGanado.victorias && rival.neto > masGanado.neto)) masGanado = rival;
   });
-  if (papaDe) return { nombre: papaDe.nombre, veces: papaDe.veces, papa: true };
-  return masGanado ? { nombre: masGanado.nombre, veces: masGanado.veces, papa: false } : null;
+  return { papaDe, masGanado };
 }
 
 // Combina las personas guardadas con lo que surge del historial de truco y
@@ -93,8 +98,8 @@ export function calcularStatsPersonas() {
   });
 
   Object.values(mapa).forEach((s) => {
-    s.trucoPapaDe = rivalMasVeces(contraTruco, s.id);
-    s.podridaPapaDe = rivalMasVeces(contraPodrida, s.id);
+    ({ papaDe: s.trucoPapaDe, masGanado: s.trucoMasGanado } = rivalesDe(contraTruco, s.id));
+    ({ papaDe: s.podridaPapaDe, masGanado: s.podridaMasGanado } = rivalesDe(contraPodrida, s.id));
   });
 
   return Object.values(mapa);

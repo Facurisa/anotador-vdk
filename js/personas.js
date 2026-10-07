@@ -91,13 +91,19 @@ function formatoDiferencia(n) {
   return String(n); // el signo "-" ya viene incluido en el número negativo
 }
 
-function filaPapaDe(p, papaDe) {
-  if (!papaDe) return '';
-  const veces = `${papaDe.veces} ${papaDe.veces === 1 ? 'vez' : 'veces'}`;
-  if (papaDe.papa) {
-    return `<div class="stat-persona-fila fila-papa-de"><span>👑 ${escapeHtml(p.nombre)} pap&aacute; de ${escapeHtml(papaDe.nombre)}</span><span>${veces}</span></div>`;
+// Dos filas independientes: "papá de" (mayor diferencia victorias − derrotas
+// contra un rival) y "Más le ganó a" (el rival al que más veces le ganó, sea o
+// no del que es papá).
+function filasRivales(p, papaDe, masGanado) {
+  let html = '';
+  if (papaDe) {
+    html += `<div class="stat-persona-fila fila-papa-de"><span>👑 ${escapeHtml(p.nombre)} pap&aacute; de ${escapeHtml(papaDe.nombre)}</span><span>${papaDe.victorias}&ndash;${papaDe.derrotas} (${formatoDiferencia(papaDe.neto)})</span></div>`;
   }
-  return `<div class="stat-persona-fila"><span class="etiqueta-stat">M&aacute;s le gan&oacute; a</span><span>${escapeHtml(papaDe.nombre)} &middot; ${veces}</span></div>`;
+  if (masGanado) {
+    const veces = `${masGanado.victorias} ${masGanado.victorias === 1 ? 'vez' : 'veces'}`;
+    html += `<div class="stat-persona-fila"><span class="etiqueta-stat">M&aacute;s le gan&oacute; a</span><span>${escapeHtml(masGanado.nombre)} &middot; ${veces}</span></div>`;
+  }
+  return html;
 }
 
 function renderTabTruco(personas) {
@@ -107,7 +113,7 @@ function renderTabTruco(personas) {
     const filas = p.trucoJugados
       ? `<div class="stat-persona-fila"><span class="etiqueta-stat">Ganados</span><span>${p.trucoGanados} de ${p.trucoJugados}</span></div>
          <div class="stat-persona-fila"><span class="etiqueta-stat">Diferencia</span><span class="${p.trucoDiferencia > 0 ? 'diferencia-positiva' : p.trucoDiferencia < 0 ? 'diferencia-negativa' : ''}">${formatoDiferencia(p.trucoDiferencia)}</span></div>
-         ${filaPapaDe(p, p.trucoPapaDe)}`
+         ${filasRivales(p, p.trucoPapaDe, p.trucoMasGanado)}`
       : `<div class="stat-persona-fila"><span style="opacity:.5">Todavía no jugó al truco</span></div>`;
     return tarjetaPersona(p, filas);
   }).join('');
@@ -121,7 +127,7 @@ function renderTabPodrida(personas) {
       ? `<div class="stat-persona-fila"><span class="etiqueta-stat">Ganadas</span><span>${p.podridaGanadas} de ${p.podridaJugadas}</span></div>
          <div class="stat-persona-fila"><span class="etiqueta-stat">Acierto</span><span>${p.podridaTotales ? Math.round((p.podridaCumplidas / p.podridaTotales) * 100) : 0}% de apuestas</span></div>
          <div class="stat-persona-fila"><span class="etiqueta-stat">Promedio</span><span>${Math.round(p.podridaSumaPuntaje / p.podridaJugadas)} puntos</span></div>
-         ${filaPapaDe(p, p.podridaPapaDe)}`
+         ${filasRivales(p, p.podridaPapaDe, p.podridaMasGanado)}`
       : `<div class="stat-persona-fila"><span style="opacity:.5">Todavía no jugó a la podrida</span></div>`;
     return tarjetaPersona(p, filas);
   }).join('');
