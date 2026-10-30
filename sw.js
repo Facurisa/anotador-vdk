@@ -1,6 +1,6 @@
 // Service worker: cachea todo lo necesario para que la app funcione sin internet.
 // Si cambiás archivos de la app, subí el número de VERSION para que los celulares bajen la versión nueva.
-const VERSION = 'anotador-v31';
+const VERSION = 'anotador-v34';
 
 const ARCHIVOS = [
   './',
@@ -18,7 +18,19 @@ const ARCHIVOS = [
   './js/selector-personas.js',
   './js/nube.js',
   './js/grupo.js',
+  './js/manual.js',
+  './js/avisos.js',
   './img/pats.jpg',
+  './img/manual/p01.jpg',
+  './img/manual/p02.jpg',
+  './img/manual/p03.jpg',
+  './img/manual/p04.jpg',
+  './img/manual/p05.jpg',
+  './img/manual/p06.jpg',
+  './img/manual/p07.jpg',
+  './img/manual/p08.jpg',
+  './img/manual/p09.jpg',
+  './img/manual/p10.jpg',
   './iconos/icono-192.png',
   './iconos/icono-512.png',
   './iconos/icono-maskable-512.png',
@@ -45,6 +57,30 @@ self.addEventListener('activate', (event) => {
       claves.filter((clave) => clave !== VERSION).map((clave) => caches.delete(clave))
     )).then(() => self.clients.claim())
   );
+});
+
+// Aviso push (llega aunque la app esté cerrada). Siempre hay que mostrar una
+// notificación; iPhone y Chrome cancelan la suscripción si un push no muestra nada.
+self.addEventListener('push', (event) => {
+  let datos = {};
+  try { datos = event.data ? event.data.json() : {}; } catch (e) { datos = {}; }
+  event.waitUntil(self.registration.showNotification(datos.titulo || 'Anotador VDK', {
+    body: datos.cuerpo || 'Se jugó una partida',
+    icon: './iconos/icono-192.png',
+    badge: './iconos/icono-192.png',
+    tag: 'partida-vdk',
+    renotify: true,
+    data: { url: datos.url || './' },
+  }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const destino = new URL((event.notification.data && event.notification.data.url) || './', self.registration.scope).href;
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((ventanas) => {
+    const abierta = ventanas.find((v) => v.url.startsWith(self.registration.scope));
+    return abierta ? abierta.focus() : self.clients.openWindow(destino);
+  }));
 });
 
 self.addEventListener('fetch', (event) => {

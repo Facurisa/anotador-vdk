@@ -76,6 +76,9 @@
             <button class="btn-link" data-accion="ir-personas">Ver personas</button>
             <button class="btn-link" data-accion="ir-historial">Ver historial</button>
           </div>
+          <div class="fila-enlaces">
+            <button class="btn-link" data-accion="ir-manual">C&oacute;mo jugar al truco</button>
+          </div>
           <p id="version-app" style="text-align:center;opacity:.35;font-size:.75rem;margin:14px 0 0"></p>
         </div>
       </div>
@@ -337,6 +340,7 @@
           <button class="btn-volver" data-accion="volver-inicio">&larr; Volver</button>
           <h1 class="titulo-pantalla">Personas</h1>
           <p class="fila-codigo-grupo">Grupo <strong id="codigo-grupo-actual"></strong> &middot; <button class="btn-link" data-accion="copiar-codigo-grupo" style="margin:0;display:inline">copiar</button> &middot; <button class="btn-link btn-peligro" data-accion="salir-grupo" style="margin:0;display:inline">salir</button></p>
+          <p class="fila-codigo-grupo" id="fila-avisos" hidden><span data-avisos-texto></span><span data-avisos-accion> &middot; <button class="btn-link" data-accion="alternar-avisos" style="margin:0;display:inline">Activar</button></span></p>
 
           <div class="fila-agregar-jugador">
             <input class="input-tiza" type="text" id="personas-nuevo-nombre" maxlength="16" placeholder="Nombre">
@@ -374,6 +378,38 @@
           <div id="historial-podrida" class="oculta"></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ======================= PANTALLA: MANUAL DE TRUCO ======================= -->
+  <section id="pantalla-manual" class="pantalla oculta">
+    <div class="marco-madera">
+      <div class="pizarra">
+        <div class="pizarra-interior-scroll">
+          <button class="btn-volver" data-accion="volver-inicio">&larr; Volver</button>
+          <h1 class="titulo-pantalla">C&oacute;mo jugar al truco</h1>
+          <p class="manual-ayuda">Toc&aacute; una p&aacute;gina para ampliarla y hacer zoom.</p>
+          <div class="manual-paginas">
+            <img src="img/manual/p01.jpg" alt="Truco para tontos: portada" width="1075" height="1613">
+            <img src="img/manual/p02.jpg" alt="Manual de truco, p&aacute;gina 2" width="1075" height="1613" loading="lazy">
+            <img src="img/manual/p03.jpg" alt="Manual de truco, p&aacute;gina 3" width="1075" height="1613" loading="lazy">
+            <img src="img/manual/p04.jpg" alt="Manual de truco, p&aacute;gina 4" width="1075" height="1613" loading="lazy">
+            <img src="img/manual/p05.jpg" alt="Manual de truco, p&aacute;gina 5" width="1075" height="1613" loading="lazy">
+            <img src="img/manual/p06.jpg" alt="Manual de truco, p&aacute;gina 6" width="1075" height="1613" loading="lazy">
+            <img src="img/manual/p07.jpg" alt="Manual de truco, p&aacute;gina 7" width="1075" height="1613" loading="lazy">
+            <img src="img/manual/p08.jpg" alt="Manual de truco: el envido" width="1075" height="1613" loading="lazy">
+            <img src="img/manual/p09.jpg" alt="Manual de truco, p&aacute;gina 9" width="1075" height="1613" loading="lazy">
+            <img src="img/manual/p10.jpg" alt="Manual de truco, p&aacute;gina 10" width="1075" height="1613" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visor a pantalla completa con zoom (pellizco, doble toque, arrastre) -->
+    <div class="overlay overlay-visor oculta" id="visor-manual">
+      <img src="" alt="">
+      <button class="btn-icono visor-cerrar" data-accion="cerrar-overlay" aria-label="Cerrar">&times;</button>
+      <p class="visor-ayuda">Pellizc&aacute; o toc&aacute; dos veces para hacer zoom</p>
     </div>
   </section>
 

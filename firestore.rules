@@ -10,6 +10,12 @@ service cloud.firestore {
         allow read, create, update, delete: if true;
       }
 
+      // Celulares del grupo con avisos push activados (cada uno se anota y se
+      // borra solo). Hace falta que sean legibles para poder avisarles.
+      match /dispositivos/{dispositivoId} {
+        allow read, create, update, delete: if true;
+      }
+
       match /historial/{entradaId} {
         allow read: if true;
         // Se puede crear una partida nueva, pero la fecha tiene que ser la

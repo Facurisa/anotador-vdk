@@ -1,8 +1,13 @@
 import * as ui from './ui.js';
 import * as nube from './nube.js';
+import * as avisos from './avisos.js';
 
 export function agregarAlHistorial(entrada) {
-  return nube.agregarAlHistorialNube(entrada);
+  const id = nube.agregarAlHistorialNube(entrada);
+  // Aviso push al resto del grupo. Va aparte y sin esperar: si falla, la
+  // partida ya quedó guardada igual.
+  avisos.notificarPartida(entrada);
+  return id;
 }
 
 function statsVacias(p) {

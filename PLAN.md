@@ -54,6 +54,26 @@ El historial y las personas guardadas **ya no viven solo en el dispositivo**: se
 - **Personas sin duplicar entre dispositivos**: al guardar una persona nueva, `selector-personas.js` busca primero si ya existe alguien con ese nombre en la caché del grupo (sin importar mayúsculas) y reutiliza su `id` en vez de crear un registro repetido.
 - **Salir del grupo**: botón "salir" junto al código en la pantalla Personas (`js/grupo.js` → `salirGrupo()`). Pide confirmación, corta los listeners de Firestore y vacía la caché en memoria (`nube.detenerListeners()`), borra `codigoGrupo` de `localStorage` y vuelve a la pantalla de grupo — desde ahí se puede crear otro grupo o unirse a uno distinto (por ejemplo, para pasarse del grupo que armó por error un amigo al grupo real del resto). No borra nada del lado del servidor: el grupo viejo sigue existiendo para quien lo use.
 
+## Manual de truco
+
+- Pantalla "Cómo jugar al truco" (enlace en el inicio, debajo de Personas/Historial): las 10 páginas del PDF "Truco para tontos" convertidas a JPG (`img/manual/p01..p10.jpg`, ~2,5 MB en total, a 1,4× del PDF original de 50 MB) y cacheadas por el service worker para verlas offline.
+- **Zoom** (`js/manual.js`): el viewport tiene el zoom del navegador desactivado, así que al tocar una página se abre un visor propio a pantalla completa (`#visor-manual`) con pellizco de dos dedos, doble toque (acerca a 2,6× / vuelve), arrastre y rueda del mouse; máximo 5×, con límites para no perder la imagen de vista. Se cierra con la ✕ o Escape.
+
+## Avisos push al terminar una partida
+
+Cada vez que se guarda una partida real (no amistosa), el resto del grupo recibe una notificación en el celular aunque la app esté cerrada (Android y iPhone). **Sin costo**: no usa Firebase Cloud Functions (exige plan Blaze) sino un Worker de Cloudflare en plan gratis.
+
+- **Piezas**:
+  - `js/avisos.js` (app): botón "Activar/Desactivar" en la pantalla Personas (fila `#fila-avisos`, solo visible si `URL_WORKER` está configurada), suscripción al push del sistema, y `notificarPartida(entrada)` llamado desde `historial.agregarAlHistorial()` (único punto por donde pasan truco y podrida). Nunca lanza error: si el aviso falla, la partida ya quedó guardada; si no hay señal queda pendiente en `localStorage` (`avisosPendientes`) y se reintenta al volver la conexión.
+  - Firestore `grupos/{codigo}/dispositivos/{id}`: cada celular con avisos guarda ahí su suscripción (`{id, subscription}`), con el id derivado de un hash del endpoint (reactivar no duplica). Reglas nuevas en `firestore.rules` (**hay que pegarlas a mano en Firebase Console → Firestore → Reglas**, igual que las anteriores). Al salir del grupo el celular se borra de esa lista; si el Worker avisa que una suscripción venció (404/410), la app la borra.
+  - `sw.js`: manejadores `push` (siempre muestra la notificación; iPhone cancela la suscripción si un push no muestra nada) y `notificationclick` (abre/enfoca la app).
+  - **Worker** en la carpeta aparte `Documents\anotador-push` (fuera del repo público): recibe `{dispositivos, titulo, cuerpo}`, cifra con `@block65/webcrypto-web-push` (aes128gcm + VAPID, compatible con Apple) y entrega a cada servicio de push. No guarda nada. Solo acepta el origen `https://facurisa.github.io` (y `localhost:8123` para pruebas), solo manda a servicios de push reales (Google, Apple, Mozilla, Windows) y tiene tope de 40 dispositivos y de largo de texto.
+- **Claves VAPID**: la pública está en `avisos.js` (`VAPID_PUBLICA`) y en `wrangler.toml`; la privada vive solo como secreto de Cloudflare (`VAPID_PRIVATE`) y en `anotador-push\.vapid-claves.txt` (ignorado por git). Si se regeneran, todos los celulares tienen que reactivar los avisos.
+- **Mensajes**: truco → "🏆 Se jugó un truco / Facu y Juan ganaron 40–32 contra Pats" (usa los nombres de personas si hay, si no el nombre del equipo); podrida → "🃏 Se jugó una podrida / Ganó Beto con 80 puntos · 2º Ana, 3º Cami". El celular que anotó no se avisa a sí mismo.
+- **iPhone**: Apple solo permite push a webs agregadas a la pantalla de inicio (iOS 16.4 o más). Si `PushManager` no existe y es iOS sin instalar, la app lo explica en la misma fila. Android funciona desde Chrome, instalada o no.
+- **Seguridad (techo)**: igual que el resto del grupo, quien tenga el código del grupo puede leer las suscripciones y mandar avisos usando el Worker; no hay login real. El Worker limita el daño (origen, servicios de push, tamaños) pero no lo impide del todo.
+- **Pendiente de deploy**: `URL_WORKER` en `avisos.js` está vacía hasta publicar el Worker (`npx wrangler deploy` en `anotador-push`, después `npx wrangler secret put VAPID_PRIVATE`). Mientras esté vacía, la app se comporta como antes.
+
 ## Personas (roster compartido)
 
 - Lista compartida de gente guardada (`{id, nombre, color}`) en Firestore (ver sección de arriba), usada tanto por el truco como por la podrida — una persona agregada en un juego aparece como sugerencia rápida en el otro, y en cualquier dispositivo del grupo.

@@ -5,6 +5,7 @@
 import * as ui from './ui.js';
 import * as nube from './nube.js';
 import * as personas from './personas.js';
+import * as avisos from './avisos.js';
 import { storage, nuevoId } from './storage.js';
 import { COLORES } from './selector-personas.js';
 
@@ -74,6 +75,7 @@ async function crearGrupo() {
   const codigo = nube.generarCodigoGrupo();
   storage.setCodigoGrupo(codigo);
   nube.iniciarListeners();
+  avisos.sincronizar();
   document.getElementById('codigo-grupo-mostrado').textContent = codigo;
   colorGrupoSeleccionado = null;
   renderPaletaGrupo();
@@ -92,6 +94,7 @@ function unirseGrupo() {
   if (codigo.length < 4) { ui.toast('Ingresá un código válido'); return; }
   storage.setCodigoGrupo(codigo);
   nube.iniciarListeners();
+  avisos.sincronizar();
   ui.mostrarPantalla('pantalla-personas');
   actualizarCodigoVisible();
   personas.renderPantalla();
@@ -101,6 +104,7 @@ function unirseGrupo() {
 async function salirGrupo() {
   const ok = await ui.confirmar('¿Salir de este grupo? Vas a dejar de ver su historial y sus personas acá, y vas a poder unirte a otro grupo o crear uno nuevo.');
   if (!ok) return;
+  avisos.quitarDelGrupo();
   nube.detenerListeners();
   storage.setCodigoGrupo(null);
   const inputCodigo = document.getElementById('grupo-codigo-input');

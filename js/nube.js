@@ -6,7 +6,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
   initializeFirestore, persistentLocalCache, collection, doc, addDoc, setDoc, deleteDoc,
-  onSnapshot, query, orderBy, serverTimestamp,
+  onSnapshot, query, orderBy, serverTimestamp, getDocs,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { storage } from './storage.js';
 
@@ -140,6 +140,25 @@ export async function borrarPersonaNube(id) {
   const codigo = grupoActivo();
   if (!codigo) return;
   await deleteDoc(doc(db, 'grupos', codigo, 'personas', id));
+}
+
+// Dispositivos del grupo con avisos push activados: { id, subscription }.
+// Se leen puntualmente (getDocs) cuando hace falta avisar, no con listener.
+export async function guardarDispositivoNube(dispositivo, codigo = grupoActivo()) {
+  if (!codigo) return;
+  await setDoc(doc(db, 'grupos', codigo, 'dispositivos', dispositivo.id), dispositivo);
+}
+
+export async function borrarDispositivoNube(id, codigo = grupoActivo()) {
+  if (!codigo) return;
+  await deleteDoc(doc(db, 'grupos', codigo, 'dispositivos', id));
+}
+
+export async function obtenerDispositivosNube() {
+  const codigo = grupoActivo();
+  if (!codigo) return [];
+  const snap = await getDocs(collection(db, 'grupos', codigo, 'dispositivos'));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
 // Al crear un grupo nuevo, sube de una sola vez lo que ya hubiera guardado

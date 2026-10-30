@@ -49,6 +49,14 @@ export const storage = {
   // Código del grupo compartido (null si todavía no se creó/unió a ninguno)
   getCodigoGrupo: () => leer('codigoGrupo', null),
   setCodigoGrupo: (codigo) => escribir('codigoGrupo', codigo),
+
+  // Id de este celular en la lista de dispositivos con avisos push (null si no activó)
+  getDispositivoAvisosId: () => leer('dispositivoAvisosId', null),
+  setDispositivoAvisosId: (id) => escribir('dispositivoAvisosId', id),
+
+  // Avisos de partidas que no se pudieron mandar por falta de señal
+  getAvisosPendientes: () => leer('avisosPendientes', []),
+  setAvisosPendientes: (lista) => escribir('avisosPendientes', lista),
 };
 
 export function nuevoId() {
