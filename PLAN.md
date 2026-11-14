@@ -54,6 +54,17 @@ El historial y las personas guardadas **ya no viven solo en el dispositivo**: se
 - **Personas sin duplicar entre dispositivos**: al guardar una persona nueva, `selector-personas.js` busca primero si ya existe alguien con ese nombre en la caché del grupo (sin importar mayúsculas) y reutiliza su `id` en vez de crear un registro repetido.
 - **Salir del grupo**: botón "salir" junto al código en la pantalla Personas (`js/grupo.js` → `salirGrupo()`). Pide confirmación, corta los listeners de Firestore y vacía la caché en memoria (`nube.detenerListeners()`), borra `codigoGrupo` de `localStorage` y vuelve a la pantalla de grupo — desde ahí se puede crear otro grupo o unirse a uno distinto (por ejemplo, para pasarse del grupo que armó por error un amigo al grupo real del resto). No borra nada del lado del servidor: el grupo viejo sigue existiendo para quien lo use.
 
+## Identidad de las personas = su nombre
+
+Una persona se identifica por su **nombre** (`nube.claveNombre()`: sin mayúsculas, tildes ni espacios de más), no por el id. Motivo: el historial es inmutable y guarda el id de cada persona al momento de jugar; si alguien se borraba sin querer y se volvía a anotar, quedaba con otro id y aparecía como dos personas (caso "Fer"). Ahora:
+- `calcularStatsPersonas()` agrupa por nombre: las partidas de un id viejo (borrado) y del nuevo se suman en una sola tarjeta.
+- Al llegar el roster de Firestore (`nube.js`), si hay dos personas con el mismo nombre se queda la más vieja (id más chico) y la repetida se borra de Firestore (solo con datos del servidor, no de caché). El historial no se toca.
+- Todos los chequeos de "ya existe alguien con ese nombre" usan la misma clave.
+
+## Detalle "Ver contra todos"
+
+En cada tarjeta de Personas, el enlace **"Ver contra todos ›"** abre un overlay (`#overlay-persona-detalle`) con pestañas Truco / Podrida y, por cada rival, cuántas veces ganó y cuántas perdió contra él, más el total. Sale de `trucoVs` / `podridaVs` (`enfrentamientosDe()` en `historial.js`, la misma fuente que "papá de" y "Más le ganó a"). En podrida, ganar/perder contra alguien cuenta cuando uno de los dos ganó la partida y el otro jugaba.
+
 ## Manual de truco
 
 - Pantalla "Cómo jugar al truco" (enlace en el inicio, debajo de Personas/Historial): las 10 páginas del PDF "Truco para tontos" convertidas a JPG (`img/manual/p01..p10.jpg`, ~2,5 MB en total, a 1,4× del PDF original de 50 MB) y cacheadas por el service worker para verlas offline.

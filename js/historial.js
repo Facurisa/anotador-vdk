@@ -12,42 +12,54 @@ export function agregarAlHistorial(entrada) {
 
 function statsVacias(p) {
   return {
-    id: p.id, nombre: p.nombre, color: p.color,
+    id: p.id, clave: nube.claveNombre(p.nombre), nombre: p.nombre, color: p.color,
     trucoJugados: 0, trucoGanados: 0, trucoDiferencia: 0,
     podridaJugadas: 0, podridaGanadas: 0,
     podridaSumaPuntaje: 0, podridaCumplidas: 0, podridaTotales: 0,
     trucoPapaDe: null, trucoMasGanado: null, podridaPapaDe: null, podridaMasGanado: null,
+    trucoVs: [], podridaVs: [],
   };
 }
 
-// Suma una victoria de "idGanador" sobre "idPerdedor" en el mapa de
-// enfrentamientos de un juego: { idGanador: { idPerdedor: {nombre, veces} } }.
-function sumarVictoriaContra(mapaContra, idGanador, idPerdedor, nombrePerdedor) {
-  if (!idGanador || !idPerdedor || idGanador === idPerdedor) return;
-  if (!mapaContra[idGanador]) mapaContra[idGanador] = {};
-  const fila = mapaContra[idGanador];
-  if (!fila[idPerdedor]) fila[idPerdedor] = { nombre: nombrePerdedor, veces: 0 };
-  fila[idPerdedor].veces += 1;
+// Suma una victoria de "claveGanador" sobre "clavePerdedor" en el mapa de
+// enfrentamientos de un juego: { claveGanador: { clavePerdedor: veces } }.
+// Las personas se identifican por su nombre (nube.claveNombre), no por el id:
+// si alguien se borró y se volvió a anotar, sigue siendo la misma persona.
+function sumarVictoriaContra(mapaContra, claveGanador, clavePerdedor) {
+  if (!claveGanador || !clavePerdedor || claveGanador === clavePerdedor) return;
+  if (!mapaContra[claveGanador]) mapaContra[claveGanador] = {};
+  const fila = mapaContra[claveGanador];
+  fila[clavePerdedor] = (fila[clavePerdedor] || 0) + 1;
+}
+
+// Resultado de "clave" contra cada persona con la que se enfrentó:
+// [{ clave, nombre, color, victorias, derrotas, neto }], los más jugados primero.
+function enfrentamientosDe(mapaContra, clave, mapa) {
+  const claves = new Set(Object.keys(mapaContra[clave] || {}));
+  Object.keys(mapaContra).forEach((k) => { if (mapaContra[k][clave]) claves.add(k); });
+  return [...claves].map((k) => {
+    const victorias = (mapaContra[clave] && mapaContra[clave][k]) || 0;
+    const derrotas = (mapaContra[k] && mapaContra[k][clave]) || 0;
+    return { clave: k, nombre: mapa[k].nombre, color: mapa[k].color, victorias, derrotas, neto: victorias - derrotas };
+  }).sort((a, b) => (b.victorias + b.derrotas) - (a.victorias + a.derrotas) || b.neto - a.neto || a.nombre.localeCompare(b.nombre));
 }
 
 // Diferencia (victorias − derrotas) que hay que superar contra un rival para
 // ser "papá" de él: tiene que ser MÁS de +3 (o sea, +4 o más).
 const DIFERENCIA_PARA_SER_PAPA = 3;
 
-// Devuelve { papaDe, masGanado } para "id" (cada uno puede ser null):
-// - papaDe: el rival con la mayor diferencia (victorias − derrotas) de "id"
-//   contra él, comparada con la de todos sus otros rivales. Tiene que superar
-//   DIFERENCIA_PARA_SER_PAPA (si no, no es papá de nadie). Si dos rivales
-//   empatan en diferencia, gana el de más victorias.
+// Devuelve { papaDe, masGanado } a partir de los enfrentamientos de una persona
+// (cada uno puede ser null):
+// - papaDe: el rival con la mayor diferencia (victorias − derrotas) de la
+//   persona contra él, comparada con la de todos sus otros rivales. Tiene que
+//   superar DIFERENCIA_PARA_SER_PAPA (si no, no es papá de nadie). Si dos
+//   rivales empatan en diferencia, gana el de más victorias.
 // - masGanado: el rival al que más veces le ganó, sin importar las derrotas
 //   (ni quién es papá de quién). Si empatan, el de mayor diferencia.
-function rivalesDe(mapaContra, id) {
-  const fila = mapaContra[id];
+function rivalesDe(enfrentamientos) {
   let papaDe = null;
   let masGanado = null;
-  Object.entries(fila || {}).forEach(([idRival, r]) => {
-    const derrotas = (mapaContra[idRival] && mapaContra[idRival][id]) ? mapaContra[idRival][id].veces : 0;
-    const rival = { nombre: r.nombre, victorias: r.veces, derrotas, neto: r.veces - derrotas };
+  enfrentamientos.filter((r) => r.victorias > 0).forEach((rival) => {
     if (rival.neto > DIFERENCIA_PARA_SER_PAPA && (!papaDe || rival.neto > papaDe.neto || (rival.neto === papaDe.neto && rival.victorias > papaDe.victorias))) papaDe = rival;
     if (!masGanado || rival.victorias > masGanado.victorias || (rival.victorias === masGanado.victorias && rival.neto > masGanado.neto)) masGanado = rival;
   });
@@ -56,13 +68,19 @@ function rivalesDe(mapaContra, id) {
 
 // Combina las personas guardadas con lo que surge del historial de truco y
 // podrida, para mostrar en la pantalla "Personas". Incluye a quienes todavía
-// no jugaron ninguna partida (con todo en 0).
+// no jugaron ninguna partida (con todo en 0). Se agrupa por nombre: las partidas
+// de alguien que se borró y se volvió a anotar se suman a la misma persona.
 export function calcularStatsPersonas() {
   const mapa = {};
-  nube.obtenerPersonas().forEach((p) => { mapa[p.id] = statsVacias(p); });
-  const obtener = (p) => { if (!mapa[p.id]) mapa[p.id] = statsVacias(p); return mapa[p.id]; };
+  nube.obtenerPersonas().forEach((p) => { mapa[nube.claveNombre(p.nombre)] = statsVacias(p); });
+  const obtener = (p) => {
+    const clave = nube.claveNombre(p.nombre);
+    if (!mapa[clave]) mapa[clave] = statsVacias(p);
+    return mapa[clave];
+  };
+  const clave = (p) => nube.claveNombre(p.nombre);
 
-  // Enfrentamientos directo por juego, para saber a quién le gana más cada uno.
+  // Enfrentamientos directos por juego, para saber a quién le gana más cada uno.
   const contraTruco = {};
   const contraPodrida = {};
 
@@ -85,7 +103,7 @@ export function calcularStatsPersonas() {
       });
       const ganadores = it.equipoGanadorIdx === 0 ? personasA : it.equipoGanadorIdx === 1 ? personasB : [];
       const perdedores = it.equipoGanadorIdx === 0 ? personasB : it.equipoGanadorIdx === 1 ? personasA : [];
-      ganadores.forEach((g) => perdedores.forEach((pe) => sumarVictoriaContra(contraTruco, g.id, pe.id, pe.nombre)));
+      ganadores.forEach((g) => perdedores.forEach((pe) => sumarVictoriaContra(contraTruco, clave(g), clave(pe))));
     } else if (it.tipo === 'podrida') {
       (it.jugadores || []).forEach((j) => {
         const s = obtener(j);
@@ -97,14 +115,16 @@ export function calcularStatsPersonas() {
       });
       const ganador = (it.jugadores || []).find((j) => j.nombre === it.ganador);
       if (ganador) {
-        (it.jugadores || []).forEach((j) => sumarVictoriaContra(contraPodrida, ganador.id, j.id, j.nombre));
+        (it.jugadores || []).forEach((j) => sumarVictoriaContra(contraPodrida, clave(ganador), clave(j)));
       }
     }
   });
 
   Object.values(mapa).forEach((s) => {
-    ({ papaDe: s.trucoPapaDe, masGanado: s.trucoMasGanado } = rivalesDe(contraTruco, s.id));
-    ({ papaDe: s.podridaPapaDe, masGanado: s.podridaMasGanado } = rivalesDe(contraPodrida, s.id));
+    s.trucoVs = enfrentamientosDe(contraTruco, s.clave, mapa);
+    s.podridaVs = enfrentamientosDe(contraPodrida, s.clave, mapa);
+    ({ papaDe: s.trucoPapaDe, masGanado: s.trucoMasGanado } = rivalesDe(s.trucoVs));
+    ({ papaDe: s.podridaPapaDe, masGanado: s.podridaMasGanado } = rivalesDe(s.podridaVs));
   });
 
   return Object.values(mapa);

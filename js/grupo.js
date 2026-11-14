@@ -54,7 +54,7 @@ function agregarPersonaGrupo() {
   const input = document.getElementById('grupo-nuevo-nombre');
   const nombre = input.value.trim().slice(0, 16);
   if (!nombre) { ui.toast('Escribí un nombre'); return; }
-  if (nube.obtenerPersonas().some((p) => p.nombre.toLowerCase() === nombre.toLowerCase())) { ui.toast('Ya agregaste a alguien con ese nombre'); return; }
+  if (nube.obtenerPersonas().some((p) => nube.claveNombre(p.nombre) === nube.claveNombre(nombre))) { ui.toast('Ya agregaste a alguien con ese nombre'); return; }
   nube.guardarPersonaNube({ id: nuevoId(), nombre, color: colorGrupoSeleccionado || COLORES[0].valor });
   input.value = '';
   colorGrupoSeleccionado = null;

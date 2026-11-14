@@ -455,6 +455,19 @@
     </div>
   </div>
 
+  <!-- ======================= OVERLAY: RESULTADO CONTRA CADA RIVAL ======================= -->
+  <div class="overlay oculta" id="overlay-persona-detalle">
+    <div class="overlay-contenido overlay-detalle">
+      <h2 id="detalle-nombre" class="detalle-titulo"></h2>
+      <div class="selector-opciones" id="detalle-tabs">
+        <button class="opcion-tiza activa" data-tab="truco">Truco</button>
+        <button class="opcion-tiza" data-tab="podrida">Podrida</button>
+      </div>
+      <div id="detalle-lista"></div>
+      <button class="btn btn-tiza-outline btn-grande" data-accion="cerrar-overlay" style="margin-top:14px">Cerrar</button>
+    </div>
+  </div>
+
   <!-- ======================= CANDADO (bloqueo anti-toques) ======================= -->
   <div class="overlay-candado oculta" id="overlay-candado">
     <span class="candado-icono">&#128274;</span>

@@ -28,7 +28,7 @@ function agregarPersona() {
   const nombre = input.value.trim().slice(0, 16);
   if (!nombre) { ui.toast('Escribí un nombre'); return; }
   const lista = nube.obtenerPersonas();
-  if (lista.some((p) => p.nombre.toLowerCase() === nombre.toLowerCase() && p.id !== editandoId)) { ui.toast('Ya existe una persona con ese nombre'); return; }
+  if (lista.some((p) => nube.claveNombre(p.nombre) === nube.claveNombre(nombre) && p.id !== editandoId)) { ui.toast('Ya existe una persona con ese nombre'); return; }
   if (editandoId) {
     nube.guardarPersonaNube({ id: editandoId, nombre, color: colorSeleccionado || COLORES[0].valor });
     ui.toast('Nombre actualizado');
@@ -83,6 +83,7 @@ function tarjetaPersona(p, filasStatsHtml) {
       <div class="tarjeta-persona-stats">
         ${filasStatsHtml}
       </div>
+      <button class="btn-link btn-detalle-persona" data-detalle-persona="${escapeHtml(p.clave)}">Ver contra todos &rsaquo;</button>
     </div>`;
 }
 
@@ -137,7 +138,50 @@ function renderTabPodrida(personas) {
   }).join('');
 }
 
+/* ---------------- Detalle: resultado contra cada rival ---------------- */
+
+let detalleClave = null;
+let detalleJuego = 'truco';
+
+function renderDetalle() {
+  const s = calcularStatsPersonas().find((x) => x.clave === detalleClave);
+  if (!s) return;
+  const vs = detalleJuego === 'truco' ? s.trucoVs : s.podridaVs;
+  const juego = detalleJuego === 'truco' ? 'al truco' : 'a la podrida';
+  document.getElementById('detalle-nombre').innerHTML = `${ui.svgFantasma(s.color, 26)} ${escapeHtml(s.nombre)}`;
+  document.querySelectorAll('#detalle-tabs .opcion-tiza').forEach((b) => b.classList.toggle('activa', b.dataset.tab === detalleJuego));
+
+  const lista = document.getElementById('detalle-lista');
+  if (!vs.length) {
+    lista.innerHTML = `<p style="opacity:.6">Todavía no le ganó ni perdió contra nadie ${juego}.</p>`;
+    return;
+  }
+  const victorias = vs.reduce((n, r) => n + r.victorias, 0);
+  const derrotas = vs.reduce((n, r) => n + r.derrotas, 0);
+  const filas = vs.map((r) => `
+    <div class="detalle-fila">
+      <span class="detalle-rival">${ui.svgFantasma(r.color, 18)}<span>${escapeHtml(r.nombre)}</span></span>
+      <span class="detalle-resultado"><span class="diferencia-positiva">${r.victorias} ganó</span> &middot; <span class="diferencia-negativa">${r.derrotas} perdió</span></span>
+    </div>`).join('');
+  lista.innerHTML = `
+    <div class="detalle-fila detalle-total">
+      <span>Contra todos</span>
+      <span class="detalle-resultado"><span class="diferencia-positiva">${victorias} ganó</span> &middot; <span class="diferencia-negativa">${derrotas} perdió</span></span>
+    </div>
+    ${filas}
+    ${detalleJuego === 'podrida' ? '<p class="detalle-nota">En la podrida cuenta como ganar o perder contra alguien cuando uno de los dos ganó la partida y el otro jugaba.</p>' : ''}`;
+}
+
+function abrirDetalle(clave) {
+  detalleClave = clave;
+  const tabActiva = document.querySelector('#personas-tabs .opcion-tiza.activa');
+  detalleJuego = tabActiva ? tabActiva.dataset.tab : 'truco';
+  renderDetalle();
+  ui.abrirOverlay('overlay-persona-detalle');
+}
+
 export function renderPantalla() {
+  if (detalleClave) renderDetalle();
   const personas = calcularStatsPersonas();
   const truco = document.getElementById('personas-lista-truco');
   const podrida = document.getElementById('personas-lista-podrida');
@@ -166,6 +210,8 @@ function initTabs() {
 function initBorrar() {
   ['personas-lista-truco', 'personas-lista-podrida'].forEach((id) => {
     document.getElementById(id).addEventListener('click', (e) => {
+      const btnDetalle = e.target.closest('[data-detalle-persona]');
+      if (btnDetalle) { abrirDetalle(btnDetalle.dataset.detallePersona); return; }
       const btnEditar = e.target.closest('[data-editar-persona]');
       if (btnEditar) { iniciarEdicion(btnEditar.dataset.editarPersona); return; }
       const btn = e.target.closest('[data-borrar-persona]');
@@ -185,6 +231,12 @@ export function init() {
   renderPaleta();
   initTabs();
   initBorrar();
+  document.getElementById('detalle-tabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.opcion-tiza');
+    if (!btn) return;
+    detalleJuego = btn.dataset.tab;
+    renderDetalle();
+  });
   nube.onPersonasCambia(() => renderPantalla());
   nube.onHistorialCambia(() => renderPantalla());
 }

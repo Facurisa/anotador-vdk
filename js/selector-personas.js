@@ -22,7 +22,7 @@ export const COLORES = [
 // grupo. Si ya existe alguien con ese nombre en la nube, reutiliza su id en vez
 // de crear un duplicado.
 export function guardarPersona(p) {
-  const existente = nube.obtenerPersonas().find((g) => g.nombre.toLowerCase() === p.nombre.toLowerCase());
+  const existente = nube.obtenerPersonas().find((g) => nube.claveNombre(g.nombre) === nube.claveNombre(p.nombre));
   const aGuardar = existente ? { ...p, id: existente.id } : p;
   nube.guardarPersonaNube(aGuardar);
   return aGuardar;
@@ -107,7 +107,7 @@ export function crearSelectorPersonas(ids, opciones = {}) {
     const input = el(ids.input);
     const nombre = input.value.trim().slice(0, 16);
     if (!nombre) { ui.toast('Escribí un nombre'); return; }
-    if (seleccionadas.some((p) => p.nombre.toLowerCase() === nombre.toLowerCase())) { ui.toast('Ese nombre ya está agregado'); return; }
+    if (seleccionadas.some((p) => nube.claveNombre(p.nombre) === nube.claveNombre(nombre))) { ui.toast('Ese nombre ya está agregado'); return; }
     const nueva = guardarPersona({ id: nuevoId(), nombre, color: colorSeleccionado || COLORES[0].valor });
     seleccionadas.push(nueva);
     input.value = '';

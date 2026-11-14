@@ -40,6 +40,12 @@ export function generarCodigoGrupo() {
   return codigo;
 }
 
+// Dos nombres se consideran el mismo si solo cambian mayúsculas, tildes o
+// espacios de más ("Fer", "fer ", "FER").
+export function claveNombre(nombre) {
+  return String(nombre || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
 export function grupoActivo() {
   return storage.getCodigoGrupo();
 }
@@ -74,7 +80,18 @@ export function iniciarListeners() {
   }, (err) => console.warn('Error escuchando el historial del grupo', err));
 
   quitarListenerPersonas = onSnapshot(refPersonas(codigo), (snap) => {
-    cachePersonas = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const todas = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // Dos personas con el mismo nombre son la misma (pasa, por ejemplo, si
+    // alguien se borra sin querer y se vuelve a anotar). Nos quedamos con la
+    // más vieja (id más chico) y borramos las repetidas. El historial no se
+    // toca: las partidas de la repetida se siguen sumando por nombre.
+    const porNombre = new Map();
+    cachePersonas = [];
+    [...todas].sort((a, b) => (a.id < b.id ? -1 : 1)).forEach((p) => {
+      const clave = claveNombre(p.nombre);
+      if (!porNombre.has(clave)) { porNombre.set(clave, p); cachePersonas.push(p); return; }
+      if (!snap.metadata.fromCache) deleteDoc(doc(db, 'grupos', codigo, 'personas', p.id)).catch(() => {});
+    });
     callbacksPersonas.forEach((cb) => cb(cachePersonas));
   }, (err) => console.warn('Error escuchando las personas del grupo', err));
 }

@@ -705,6 +705,14 @@ h1, h2, h3, p { margin: 0 0 10px; }
 .etiqueta-stat { opacity: .6; min-width: 60px; }
 .diferencia-positiva { color: #9be89b; }
 .diferencia-negativa { color: #ff9d9d; }
+.btn-detalle-persona { margin: 6px 0 0; }
+.detalle-titulo { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 0 14px; font-size: 1.5rem; }
+.overlay-detalle .selector-opciones { margin-bottom: 8px; }
+.detalle-fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed rgba(255,255,255,.14); font-size: 1rem; }
+.detalle-rival { display: flex; align-items: center; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.detalle-resultado { white-space: nowrap; font-size: .95rem; }
+.detalle-total { font-size: 1.1rem; border-bottom: 2px solid rgba(255,255,255,.3); }
+.overlay-contenido p.detalle-nota { font-size: .82rem; opacity: .55; margin-top: 12px; }
 .fila-papa-de { color: #ffd873; border-top: 1px dashed rgba(255,216,115,.35); margin-top: 4px; padding-top: 8px; }
 
 /* ============ Candado ============ */
